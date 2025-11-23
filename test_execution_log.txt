@@ -1,0 +1,277 @@
+﻿Test Execution Started: 2025-11-23 02:11:57
+Java Version: java version "17.0.12" 2024-07-16 LTS
+Source file found: BankingApplicationSimulator.java
+Compilation: SUCCESS
+
+Test Execution Output:
+===============================================================
+    BANKING APPLICATION SIMULATOR - DATA VALIDATION SYSTEM    
+===============================================================
+
+Running 12 Automated Test Cases from Sprint 2...
+
+--------------------------------------------------------------
+TC01: VALID - Transaction with correct data
+--------------------------------------------------------------
+Description: Valid transaction with all correct data
+Expected Result: Request processed successfully
+
+Test ID: TC01
+Equivalence Class: Valida 1
+Input Data:
+  - Bank Code: 123
+  - Branch Code: 4567
+  - Account Number: 1234567890
+  - Personal Key: Abc12345
+  - Order Value: Checkbook
+
+Validation Result:
+  Status: SUCCESS
+  Request processed successfully
+  Confirmation message displayed: Checkbook request approved
+
+
+--------------------------------------------------------------
+TC07: VALID - Statement request
+--------------------------------------------------------------
+Description: Valid request for a statement
+Expected Result: Request processed successfully
+
+Test ID: TC07
+Equivalence Class: Valida 2
+Input Data:
+  - Bank Code: 999
+  - Branch Code: 1111
+  - Account Number: 9876543210
+  - Personal Key: ZxY98765
+  - Order Value: Statement
+
+Validation Result:
+  Status: SUCCESS
+  Request processed successfully
+  Confirmation message displayed: Statement request approved
+
+
+--------------------------------------------------------------
+TC08: VALID - Checkbook request
+--------------------------------------------------------------
+Description: Valid request for a checkbook
+Expected Result: Request processed successfully
+
+Test ID: TC08
+Equivalence Class: Valida 3
+Input Data:
+  - Bank Code: 555
+  - Branch Code: 2222
+  - Account Number: 1111111111
+  - Personal Key: Key12345
+  - Order Value: Checkbook
+
+Validation Result:
+  Status: SUCCESS
+  Request processed successfully
+  Confirmation message displayed: Checkbook request approved
+
+
+--------------------------------------------------------------
+TC12: VALID - Boundary values (minimums)
+--------------------------------------------------------------
+Description: Valid transaction with minimum/edge values
+Expected Result: Request processed successfully
+
+Test ID: TC12
+Equivalence Class: Valida (Borde) 4
+Input Data:
+  - Bank Code: 000
+  - Branch Code: 0000
+  - Account Number: 0000000000
+  - Personal Key: Edge1234
+  - Order Value: Checkbook
+
+Validation Result:
+  Status: SUCCESS
+  Request processed successfully
+  Confirmation message displayed: Checkbook request approved
+
+
+--------------------------------------------------------------
+TC02: INVALID - Bank code too short
+--------------------------------------------------------------
+Description: Bank code with less than 3 digits
+Expected Result: Error - invalid bank code
+
+Test ID: TC02
+Equivalence Class: Banco (<3 digitos) 5
+Input Data:
+  - Bank Code: 12
+  - Branch Code: 4567
+  - Account Number: 1234567890
+  - Personal Key: Abc12345
+  - Order Value: Statement
+
+Validation Result:
+  Status: FAILURE
+  Error: invalid bank code
+  Bank code must be exactly 3 digits (received: 2)
+
+
+--------------------------------------------------------------
+TC03: INVALID - Branch code non-numeric
+--------------------------------------------------------------
+Description: Branch code contains letters
+Expected Result: Error - invalid branch code
+
+Test ID: TC03
+Equivalence Class: Sucursal (no numerico) 6
+Input Data:
+  - Bank Code: 123
+  - Branch Code: ABCD
+  - Account Number: 1234567890
+  - Personal Key: Abc12345
+  - Order Value: Checkbook
+
+Validation Result:
+  Status: FAILURE
+  Error: invalid branch code
+  Branch code must be numeric
+
+
+--------------------------------------------------------------
+TC04: INVALID - Account number too long
+--------------------------------------------------------------
+Description: Account number with more than 10 digits
+Expected Result: Error - invalid account number
+
+Test ID: TC04
+Equivalence Class: Cuenta (>10 digitos) 7
+Input Data:
+  - Bank Code: 123
+  - Branch Code: 4567
+  - Account Number: 1234567890123
+  - Personal Key: Abc12345
+  - Order Value: Statement
+
+Validation Result:
+  Status: FAILURE
+  Error: invalid account number
+  Account number must be exactly 10 digits (received: 13)
+
+
+--------------------------------------------------------------
+TC05: INVALID - Personal key too short
+--------------------------------------------------------------
+Description: Personal key with less than 8 characters
+Expected Result: Error - invalid personal key
+
+Test ID: TC05
+Equivalence Class: Clave personal (demasiado corta) 8
+Input Data:
+  - Bank Code: 123
+  - Branch Code: 4567
+  - Account Number: 1234567890
+  - Personal Key: A1
+  - Order Value: Checkbook
+
+Validation Result:
+  Status: FAILURE
+  Error: invalid personal key
+  Personal key must be at least 8 characters (received: 2)
+
+
+--------------------------------------------------------------
+TC06: INVALID - Invalid order type
+--------------------------------------------------------------
+Description: Order value is not Checkbook or Statement
+Expected Result: Error - invalid order type
+
+Test ID: TC06
+Equivalence Class: Valor de Orden (no Checkbook/Statement) 9
+Input Data:
+  - Bank Code: 123
+  - Branch Code: 4567
+  - Account Number: 1234567890
+  - Personal Key: Abc12345
+  - Order Value: Loan
+
+Validation Result:
+  Status: FAILURE
+  Error: invalid order type
+  Order value must be 'Checkbook' or 'Statement' (received: 'Loan')
+
+
+--------------------------------------------------------------
+TC09: INVALID - Bank code non-numeric
+--------------------------------------------------------------
+Description: Bank code contains letters
+Expected Result: Error - invalid bank code
+
+Test ID: TC09
+Equivalence Class: Banco (no numerico) 10
+Input Data:
+  - Bank Code: ABC
+  - Branch Code: 4567
+  - Account Number: 1234567890
+  - Personal Key: Abc12345
+  - Order Value: Statement
+
+Validation Result:
+  Status: FAILURE
+  Error: invalid bank code
+  Bank code must be numeric
+
+
+--------------------------------------------------------------
+TC10: INVALID - Branch code too short
+--------------------------------------------------------------
+Description: Branch code with less than 4 digits
+Expected Result: Error - invalid branch code
+
+Test ID: TC10
+Equivalence Class: Sucursal (<4 digitos) 11
+Input Data:
+  - Bank Code: 123
+  - Branch Code: 45
+  - Account Number: 1234567890
+  - Personal Key: Abc12345
+  - Order Value: Checkbook
+
+Validation Result:
+  Status: FAILURE
+  Error: invalid branch code
+  Branch code must be exactly 4 digits (received: 2)
+
+
+--------------------------------------------------------------
+TC11: INVALID - Account number non-numeric
+--------------------------------------------------------------
+Description: Account number contains letters
+Expected Result: Error - invalid account number
+
+Test ID: TC11
+Equivalence Class: Cuenta (no numerico) 12
+Input Data:
+  - Bank Code: 123
+  - Branch Code: 4567
+  - Account Number: ABCDE12345
+  - Personal Key: Abc12345
+  - Order Value: Statement
+
+Validation Result:
+  Status: FAILURE
+  Error: invalid account number
+  Account number must be numeric
+
+
+===============================================================
+              ALL 12 TEST CASES EXECUTED SUCCESSFULLY          
+===============================================================
+
+===============================================================
+                     INTERACTIVE MODE                          
+===============================================================
+
+Would you like to enter a transaction manually? (Y/N): 
+
+Thank you for using the Banking Application Simulator!
+RESULT: ALL TESTS PASSED
+Test Execution Completed: 2025-11-23 02:12:00
