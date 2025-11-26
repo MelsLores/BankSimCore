@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ValidationUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.banksim.util</a> &gt; <span class="el_source">ValidationUtil.java</span></div><h1>ValidationUtil.java</h1><pre class="source lang-java linenums">package com.banksim.util;
+
+import com.banksim.config.SecurityConfig;
+import java.util.regex.Pattern;
+
+/**
+ * Validation utility for banking business rules.
+ * Validates account numbers, personal keys, and other banking-specific data.
+ * 
+ * Implements validation rules from the 12 test cases specification:
+ * - Bank code: 3 digits
+ * - Branch code: 4 digits
+ * - Account number: 10 digits
+ * - Personal key: Minimum 8 characters (alphanumeric with at least one uppercase, one lowercase, one digit)
+ * 
+ * @author Jorge Pena - REM Consultancy
+ * @version 1.0
+ * @since 2024
+ */
+<span class="nc" id="L20">public class ValidationUtil {</span>
+    
+<span class="fc" id="L22">    private static final SecurityConfig config = SecurityConfig.getInstance();</span>
+    
+    // Regex patterns from configuration
+    private static final Pattern BANK_CODE_PATTERN;
+    private static final Pattern BRANCH_CODE_PATTERN;
+    private static final Pattern ACCOUNT_NUMBER_PATTERN;
+    private static final Pattern PERSONAL_KEY_PATTERN;
+    
+    // Email and phone patterns
+<span class="fc" id="L31">    private static final Pattern EMAIL_PATTERN = Pattern.compile(</span>
+        &quot;^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$&quot;
+    );
+    
+<span class="fc" id="L35">    private static final Pattern PHONE_PATTERN = Pattern.compile(</span>
+        &quot;^\\+?[1-9]\\d{1,14}$&quot; // E.164 international format
+    );
+    
+    static {
+        // Load patterns from configuration with defaults
+<span class="fc" id="L41">        String bankCodeRegex = config.getProperty(&quot;validation.bank.code.pattern&quot;, &quot;^[0-9]{3}$&quot;);</span>
+<span class="fc" id="L42">        String branchCodeRegex = config.getProperty(&quot;validation.branch.code.pattern&quot;, &quot;^[0-9]{4}$&quot;);</span>
+<span class="fc" id="L43">        String accountNumberRegex = config.getProperty(&quot;validation.account.number.pattern&quot;, &quot;^[0-9]{10}$&quot;);</span>
+<span class="fc" id="L44">        String personalKeyRegex = config.getProperty(&quot;validation.personal.key.pattern&quot;, </span>
+            &quot;^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{8,}$&quot;);
+        
+<span class="fc" id="L47">        BANK_CODE_PATTERN = Pattern.compile(bankCodeRegex);</span>
+<span class="fc" id="L48">        BRANCH_CODE_PATTERN = Pattern.compile(branchCodeRegex);</span>
+<span class="fc" id="L49">        ACCOUNT_NUMBER_PATTERN = Pattern.compile(accountNumberRegex);</span>
+<span class="fc" id="L50">        PERSONAL_KEY_PATTERN = Pattern.compile(personalKeyRegex);</span>
+<span class="fc" id="L51">    }</span>
+    
+    /**
+     * Validates bank code format (3 digits)
+     * 
+     * @param bankCode Bank code to validate
+     * @return true if valid, false otherwise
+     */
+    public static boolean isValidBankCode(String bankCode) {
+<span class="pc bpc" id="L60" title="1 of 4 branches missed.">        return bankCode != null &amp;&amp; BANK_CODE_PATTERN.matcher(bankCode).matches();</span>
+    }
+    
+    /**
+     * Validates branch code format (4 digits)
+     * 
+     * @param branchCode Branch code to validate
+     * @return true if valid, false otherwise
+     */
+    public static boolean isValidBranchCode(String branchCode) {
+<span class="pc bpc" id="L70" title="1 of 4 branches missed.">        return branchCode != null &amp;&amp; BRANCH_CODE_PATTERN.matcher(branchCode).matches();</span>
+    }
+    
+    /**
+     * Validates account number format (10 digits)
+     * 
+     * @param accountNumber Account number to validate (without bank and branch codes)
+     * @return true if valid, false otherwise
+     */
+    public static boolean isValidAccountNumber(String accountNumber) {
+<span class="pc bpc" id="L80" title="1 of 4 branches missed.">        return accountNumber != null &amp;&amp; ACCOUNT_NUMBER_PATTERN.matcher(accountNumber).matches();</span>
+    }
+    
+    /**
+     * Validates full account number format (XXX-XXXX-XXXXXXXXXX)
+     * 
+     * @param fullAccountNumber Complete account number with separators
+     * @return true if valid, false otherwise
+     */
+    public static boolean isValidFullAccountNumber(String fullAccountNumber) {
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        if (fullAccountNumber == null) {</span>
+<span class="nc" id="L91">            return false;</span>
+        }
+        
+<span class="nc" id="L94">        String[] parts = fullAccountNumber.split(&quot;-&quot;);</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">        if (parts.length != 3) {</span>
+<span class="nc" id="L96">            return false;</span>
+        }
+        
+<span class="nc bnc" id="L99" title="All 2 branches missed.">        return isValidBankCode(parts[0]) &amp;&amp; </span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">               isValidBranchCode(parts[1]) &amp;&amp; </span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">               isValidAccountNumber(parts[2]);</span>
+    }
+    
+    /**
+     * Validates personal key format
+     * Must be at least 8 characters with at least one uppercase, one lowercase, and one digit
+     * 
+     * @param personalKey Personal key to validate
+     * @return true if valid, false otherwise
+     */
+    public static boolean isValidPersonalKey(String personalKey) {
+<span class="pc bpc" id="L112" title="1 of 4 branches missed.">        return personalKey != null &amp;&amp; PERSONAL_KEY_PATTERN.matcher(personalKey).matches();</span>
+    }
+    
+    /**
+     * Validates email format
+     * 
+     * @param email Email address to validate
+     * @return true if valid, false otherwise
+     */
+    public static boolean isValidEmail(String email) {
+<span class="fc bfc" id="L122" title="All 4 branches covered.">        return email != null &amp;&amp; EMAIL_PATTERN.matcher(email).matches();</span>
+    }
+    
+    /**
+     * Validates phone number format (E.164 international format)
+     * 
+     * @param phone Phone number to validate
+     * @return true if valid, false otherwise
+     */
+    public static boolean isValidPhone(String phone) {
+<span class="nc bnc" id="L132" title="All 4 branches missed.">        return phone != null &amp;&amp; PHONE_PATTERN.matcher(phone).matches();</span>
+    }
+    
+    /**
+     * Validates username format
+     * Must be 3-50 characters, alphanumeric and underscore/dot only
+     * 
+     * @param username Username to validate
+     * @return true if valid, false otherwise
+     */
+    public static boolean isValidUsername(String username) {
+<span class="fc bfc" id="L143" title="All 6 branches covered.">        if (username == null || username.length() &lt; 3 || username.length() &gt; 50) {</span>
+<span class="fc" id="L144">            return false;</span>
+        }
+<span class="fc" id="L146">        return username.matches(&quot;^[a-zA-Z0-9._]+$&quot;);</span>
+    }
+    
+    /**
+     * Validates customer code format
+     * Must start with &quot;CUST&quot; followed by digits
+     * 
+     * @param customerCode Customer code to validate
+     * @return true if valid, false otherwise
+     */
+    public static boolean isValidCustomerCode(String customerCode) {
+<span class="nc bnc" id="L157" title="All 4 branches missed.">        return customerCode != null &amp;&amp; customerCode.matches(&quot;^CUST\\d{3,}$&quot;);</span>
+    }
+    
+    /**
+     * Validates amount is positive
+     * 
+     * @param amount Amount to validate
+     * @return true if positive, false otherwise
+     */
+    public static boolean isPositiveAmount(double amount) {
+<span class="nc bnc" id="L167" title="All 2 branches missed.">        return amount &gt; 0;</span>
+    }
+    
+    /**
+     * Validates amount is within range
+     * 
+     * @param amount Amount to validate
+     * @param min Minimum allowed value
+     * @param max Maximum allowed value
+     * @return true if within range, false otherwise
+     */
+    public static boolean isAmountInRange(double amount, double min, double max) {
+<span class="nc bnc" id="L179" title="All 4 branches missed.">        return amount &gt;= min &amp;&amp; amount &lt;= max;</span>
+    }
+    
+    /**
+     * Validates service request type
+     * 
+     * @param serviceType Service type to validate
+     * @return true if valid service type, false otherwise
+     */
+    public static boolean isValidServiceType(String serviceType) {
+<span class="nc bnc" id="L189" title="All 2 branches missed.">        if (serviceType == null) {</span>
+<span class="nc" id="L190">            return false;</span>
+        }
+        
+<span class="nc" id="L193">        String normalized = serviceType.toUpperCase();</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">        return normalized.equals(&quot;CHECKBOOK&quot;) || </span>
+<span class="nc bnc" id="L195" title="All 2 branches missed.">               normalized.equals(&quot;STATEMENT&quot;) || </span>
+<span class="nc bnc" id="L196" title="All 2 branches missed.">               normalized.equals(&quot;CARD&quot;);</span>
+    }
+    
+    /**
+     * Validates account type
+     * 
+     * @param accountType Account type to validate
+     * @return true if valid account type, false otherwise
+     */
+    public static boolean isValidAccountType(String accountType) {
+<span class="nc bnc" id="L206" title="All 2 branches missed.">        if (accountType == null) {</span>
+<span class="nc" id="L207">            return false;</span>
+        }
+        
+<span class="nc" id="L210">        String normalized = accountType.toUpperCase();</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">        return normalized.equals(&quot;SAVINGS&quot;) || </span>
+<span class="nc bnc" id="L212" title="All 2 branches missed.">               normalized.equals(&quot;CHECKING&quot;) || </span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">               normalized.equals(&quot;BUSINESS&quot;);</span>
+    }
+    
+    /**
+     * Sanitizes input string to prevent injection attacks
+     * 
+     * @param input Input string to sanitize
+     * @return Sanitized string
+     */
+    public static String sanitizeInput(String input) {
+<span class="nc bnc" id="L223" title="All 2 branches missed.">        if (input == null) {</span>
+<span class="nc" id="L224">            return null;</span>
+        }
+        
+        // Remove potentially dangerous characters
+<span class="nc" id="L228">        return input.replaceAll(&quot;[&lt;&gt;\&quot;'%;()&amp;+]&quot;, &quot;&quot;);</span>
+    }
+    
+    /**
+     * Validates string is not null or empty
+     * 
+     * @param value String to validate
+     * @return true if not null and not empty, false otherwise
+     */
+    public static boolean isNotEmpty(String value) {
+<span class="nc bnc" id="L238" title="All 4 branches missed.">        return value != null &amp;&amp; !value.trim().isEmpty();</span>
+    }
+    
+    /**
+     * Validates string length is within range
+     * 
+     * @param value String to validate
+     * @param minLength Minimum length
+     * @param maxLength Maximum length
+     * @return true if length is within range, false otherwise
+     */
+    public static boolean isLengthInRange(String value, int minLength, int maxLength) {
+<span class="nc bnc" id="L250" title="All 2 branches missed.">        if (value == null) {</span>
+<span class="nc" id="L251">            return false;</span>
+        }
+<span class="nc" id="L253">        int length = value.length();</span>
+<span class="nc bnc" id="L254" title="All 4 branches missed.">        return length &gt;= minLength &amp;&amp; length &lt;= maxLength;</span>
+    }
+    
+    /**
+     * Gets validation error message for bank code
+     * 
+     * @param bankCode Bank code that failed validation
+     * @return Error message
+     */
+    public static String getBankCodeError(String bankCode) {
+<span class="pc bpc" id="L264" title="2 of 4 branches missed.">        if (bankCode == null || bankCode.isEmpty()) {</span>
+<span class="nc" id="L265">            return &quot;Bank code is required&quot;;</span>
+        }
+<span class="fc bfc" id="L267" title="All 2 branches covered.">        if (!bankCode.matches(&quot;^[0-9]+$&quot;)) {</span>
+<span class="fc" id="L268">            return &quot;Bank code must contain only digits&quot;;</span>
+        }
+<span class="pc bpc" id="L270" title="1 of 2 branches missed.">        if (bankCode.length() != 3) {</span>
+<span class="fc" id="L271">            return &quot;Bank code must be exactly 3 digits&quot;;</span>
+        }
+<span class="nc" id="L273">        return &quot;Invalid bank code format&quot;;</span>
+    }
+    
+    /**
+     * Gets validation error message for branch code
+     * 
+     * @param branchCode Branch code that failed validation
+     * @return Error message
+     */
+    public static String getBranchCodeError(String branchCode) {
+<span class="pc bpc" id="L283" title="2 of 4 branches missed.">        if (branchCode == null || branchCode.isEmpty()) {</span>
+<span class="nc" id="L284">            return &quot;Branch code is required&quot;;</span>
+        }
+<span class="fc bfc" id="L286" title="All 2 branches covered.">        if (!branchCode.matches(&quot;^[0-9]+$&quot;)) {</span>
+<span class="fc" id="L287">            return &quot;Branch code must contain only digits&quot;;</span>
+        }
+<span class="pc bpc" id="L289" title="1 of 2 branches missed.">        if (branchCode.length() != 4) {</span>
+<span class="fc" id="L290">            return &quot;Branch code must be exactly 4 digits&quot;;</span>
+        }
+<span class="nc" id="L292">        return &quot;Invalid branch code format&quot;;</span>
+    }
+    
+    /**
+     * Gets validation error message for account number
+     * 
+     * @param accountNumber Account number that failed validation
+     * @return Error message
+     */
+    public static String getAccountNumberError(String accountNumber) {
+<span class="pc bpc" id="L302" title="2 of 4 branches missed.">        if (accountNumber == null || accountNumber.isEmpty()) {</span>
+<span class="nc" id="L303">            return &quot;Account number is required&quot;;</span>
+        }
+<span class="fc bfc" id="L305" title="All 2 branches covered.">        if (!accountNumber.matches(&quot;^[0-9]+$&quot;)) {</span>
+<span class="fc" id="L306">            return &quot;Account number must contain only digits&quot;;</span>
+        }
+<span class="pc bpc" id="L308" title="1 of 2 branches missed.">        if (accountNumber.length() != 10) {</span>
+<span class="fc" id="L309">            return &quot;Account number must be exactly 10 digits&quot;;</span>
+        }
+<span class="nc" id="L311">        return &quot;Invalid account number format&quot;;</span>
+    }
+    
+    /**
+     * Gets validation error message for personal key
+     * 
+     * @param personalKey Personal key that failed validation
+     * @return Error message
+     */
+    public static String getPersonalKeyError(String personalKey) {
+<span class="pc bpc" id="L321" title="2 of 4 branches missed.">        if (personalKey == null || personalKey.isEmpty()) {</span>
+<span class="nc" id="L322">            return &quot;Personal key is required&quot;;</span>
+        }
+<span class="fc bfc" id="L324" title="All 2 branches covered.">        if (personalKey.length() &lt; 8) {</span>
+<span class="fc" id="L325">            return &quot;Personal key must be at least 8 characters&quot;;</span>
+        }
+<span class="fc bfc" id="L327" title="All 2 branches covered.">        if (!personalKey.matches(&quot;.*[A-Z].*&quot;)) {</span>
+<span class="fc" id="L328">            return &quot;Personal key must contain at least one uppercase letter&quot;;</span>
+        }
+<span class="fc bfc" id="L330" title="All 2 branches covered.">        if (!personalKey.matches(&quot;.*[a-z].*&quot;)) {</span>
+<span class="fc" id="L331">            return &quot;Personal key must contain at least one lowercase letter&quot;;</span>
+        }
+<span class="fc bfc" id="L333" title="All 2 branches covered.">        if (!personalKey.matches(&quot;.*\\d.*&quot;)) {</span>
+<span class="fc" id="L334">            return &quot;Personal key must contain at least one digit&quot;;</span>
+        }
+<span class="pc bpc" id="L336" title="1 of 2 branches missed.">        if (!personalKey.matches(&quot;^[A-Za-z\\d]+$&quot;)) {</span>
+<span class="fc" id="L337">            return &quot;Personal key must contain only letters and digits&quot;;</span>
+        }
+<span class="nc" id="L339">        return &quot;Invalid personal key format&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransactionRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.banksim.repository</a> &gt; <span class="el_source">TransactionRepository.java</span></div><h1>TransactionRepository.java</h1><pre class="source lang-java linenums">package com.banksim.repository;
+
+import com.banksim.config.DatabaseConfig;
+import com.banksim.model.Transaction;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+/**
+ * Repository for Transaction entity data access operations.
+ * 
+ * @author Jorge Pena - REM Consultancy
+ * @version 1.0
+ * @since 2024
+ */
+public class TransactionRepository {
+    
+    private final DatabaseConfig dbConfig;
+    
+<span class="nc" id="L22">    public TransactionRepository() {</span>
+<span class="nc" id="L23">        this.dbConfig = DatabaseConfig.getInstance();</span>
+<span class="nc" id="L24">    }</span>
+    
+    /**
+     * Creates a new transaction
+     * 
+     * @param transaction Transaction entity
+     * @return Created transaction with ID
+     * @throws SQLException if error occurs
+     */
+    public Transaction create(Transaction transaction) throws SQLException {
+<span class="nc" id="L34">        String sql = &quot;INSERT INTO transactions (transaction_uuid, account_id, transaction_type, amount, &quot; +</span>
+                     &quot;balance_before, balance_after, description, reference_number, related_account_id, status) &quot; +
+                     &quot;VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING transaction_id, created_at&quot;;
+        
+<span class="nc" id="L38">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L39">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L41">            stmt.setObject(1, transaction.getTransactionUuid());</span>
+<span class="nc" id="L42">            stmt.setInt(2, transaction.getAccountId());</span>
+<span class="nc" id="L43">            stmt.setString(3, transaction.getTransactionType().name());</span>
+<span class="nc" id="L44">            stmt.setBigDecimal(4, transaction.getAmount());</span>
+<span class="nc" id="L45">            stmt.setBigDecimal(5, transaction.getBalanceBefore());</span>
+<span class="nc" id="L46">            stmt.setBigDecimal(6, transaction.getBalanceAfter());</span>
+<span class="nc" id="L47">            stmt.setString(7, transaction.getDescription());</span>
+<span class="nc" id="L48">            stmt.setString(8, transaction.getReferenceNumber());</span>
+            
+<span class="nc bnc" id="L50" title="All 2 branches missed.">            if (transaction.getRelatedAccountId() != null) {</span>
+<span class="nc" id="L51">                stmt.setInt(9, transaction.getRelatedAccountId());</span>
+            } else {
+<span class="nc" id="L53">                stmt.setNull(9, Types.INTEGER);</span>
+            }
+            
+<span class="nc" id="L56">            stmt.setString(10, transaction.getStatus().name());</span>
+            
+<span class="nc" id="L58">            ResultSet rs = stmt.executeQuery();</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L60">                transaction.setTransactionId(rs.getInt(&quot;transaction_id&quot;));</span>
+<span class="nc" id="L61">                transaction.setCreatedAt(rs.getTimestamp(&quot;created_at&quot;).toLocalDateTime());</span>
+            }
+            
+<span class="nc" id="L64">            return transaction;</span>
+        }
+    }
+    
+    /**
+     * Finds transaction by ID
+     * 
+     * @param transactionId Transaction ID
+     * @return Optional with transaction
+     * @throws SQLException if error occurs
+     */
+    public Optional&lt;Transaction&gt; findById(Integer transactionId) throws SQLException {
+<span class="nc" id="L76">        String sql = &quot;SELECT * FROM transactions WHERE transaction_id = ?&quot;;</span>
+        
+<span class="nc" id="L78">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L79">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L81">            stmt.setInt(1, transactionId);</span>
+<span class="nc" id="L82">            ResultSet rs = stmt.executeQuery();</span>
+            
+<span class="nc bnc" id="L84" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L85">                return Optional.of(mapResultSetToTransaction(rs));</span>
+            }
+            
+<span class="nc" id="L88">            return Optional.empty();</span>
+<span class="nc bnc" id="L89" title="All 4 branches missed.">        }</span>
+    }
+    
+    /**
+     * Finds transaction by UUID
+     * 
+     * @param uuid Transaction UUID
+     * @return Optional with transaction
+     * @throws SQLException if error occurs
+     */
+    public Optional&lt;Transaction&gt; findByUuid(UUID uuid) throws SQLException {
+<span class="nc" id="L100">        String sql = &quot;SELECT * FROM transactions WHERE transaction_uuid = ?&quot;;</span>
+        
+<span class="nc" id="L102">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L103">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L105">            stmt.setObject(1, uuid);</span>
+<span class="nc" id="L106">            ResultSet rs = stmt.executeQuery();</span>
+            
+<span class="nc bnc" id="L108" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L109">                return Optional.of(mapResultSetToTransaction(rs));</span>
+            }
+            
+<span class="nc" id="L112">            return Optional.empty();</span>
+<span class="nc bnc" id="L113" title="All 4 branches missed.">        }</span>
+    }
+    
+    /**
+     * Finds all transactions for an account
+     * 
+     * @param accountId Account ID
+     * @param limit Records to return
+     * @param offset Records to skip
+     * @return List of transactions
+     * @throws SQLException if error occurs
+     */
+    public List&lt;Transaction&gt; findByAccountId(Integer accountId, int limit, int offset) throws SQLException {
+<span class="nc" id="L126">        String sql = &quot;SELECT * FROM transactions WHERE account_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?&quot;;</span>
+<span class="nc" id="L127">        List&lt;Transaction&gt; transactions = new ArrayList&lt;&gt;();</span>
+        
+<span class="nc" id="L129">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L130">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L132">            stmt.setInt(1, accountId);</span>
+<span class="nc" id="L133">            stmt.setInt(2, limit);</span>
+<span class="nc" id="L134">            stmt.setInt(3, offset);</span>
+            
+<span class="nc" id="L136">            ResultSet rs = stmt.executeQuery();</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">            while (rs.next()) {</span>
+<span class="nc" id="L138">                transactions.add(mapResultSetToTransaction(rs));</span>
+            }
+        }
+        
+<span class="nc" id="L142">        return transactions;</span>
+    }
+    
+    /**
+     * Finds all transactions for an account (no pagination)
+     * 
+     * @param accountId Account ID
+     * @return List of transactions
+     * @throws SQLException if error occurs
+     */
+    public List&lt;Transaction&gt; findByAccountId(Integer accountId) throws SQLException {
+<span class="nc" id="L153">        String sql = &quot;SELECT * FROM transactions WHERE account_id = ? ORDER BY created_at DESC&quot;;</span>
+<span class="nc" id="L154">        List&lt;Transaction&gt; transactions = new ArrayList&lt;&gt;();</span>
+        
+<span class="nc" id="L156">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L157">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L159">            stmt.setInt(1, accountId);</span>
+<span class="nc" id="L160">            ResultSet rs = stmt.executeQuery();</span>
+            
+<span class="nc bnc" id="L162" title="All 2 branches missed.">            while (rs.next()) {</span>
+<span class="nc" id="L163">                transactions.add(mapResultSetToTransaction(rs));</span>
+            }
+        }
+        
+<span class="nc" id="L167">        return transactions;</span>
+    }
+    
+    /**
+     * Finds transactions by type
+     * 
+     * @param accountId Account ID
+     * @param type Transaction type
+     * @return List of transactions
+     * @throws SQLException if error occurs
+     */
+    public List&lt;Transaction&gt; findByAccountIdAndType(Integer accountId, Transaction.TransactionType type) throws SQLException {
+<span class="nc" id="L179">        String sql = &quot;SELECT * FROM transactions WHERE account_id = ? AND transaction_type = ? ORDER BY created_at DESC&quot;;</span>
+<span class="nc" id="L180">        List&lt;Transaction&gt; transactions = new ArrayList&lt;&gt;();</span>
+        
+<span class="nc" id="L182">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L183">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L185">            stmt.setInt(1, accountId);</span>
+<span class="nc" id="L186">            stmt.setString(2, type.name());</span>
+            
+<span class="nc" id="L188">            ResultSet rs = stmt.executeQuery();</span>
+<span class="nc bnc" id="L189" title="All 2 branches missed.">            while (rs.next()) {</span>
+<span class="nc" id="L190">                transactions.add(mapResultSetToTransaction(rs));</span>
+            }
+        }
+        
+<span class="nc" id="L194">        return transactions;</span>
+    }
+    
+    /**
+     * Updates transaction status
+     * 
+     * @param transactionId Transaction ID
+     * @param status New status
+     * @throws SQLException if error occurs
+     */
+    public void updateStatus(Integer transactionId, Transaction.TransactionStatus status) throws SQLException {
+<span class="nc" id="L205">        String sql = &quot;UPDATE transactions SET status = ? WHERE transaction_id = ?&quot;;</span>
+        
+<span class="nc" id="L207">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L208">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L210">            stmt.setString(1, status.name());</span>
+<span class="nc" id="L211">            stmt.setInt(2, transactionId);</span>
+<span class="nc" id="L212">            stmt.executeUpdate();</span>
+        }
+<span class="nc" id="L214">    }</span>
+    
+    /**
+     * Counts transactions for an account
+     * 
+     * @param accountId Account ID
+     * @return Transaction count
+     * @throws SQLException if error occurs
+     */
+    public int countByAccountId(Integer accountId) throws SQLException {
+<span class="nc" id="L224">        String sql = &quot;SELECT COUNT(*) FROM transactions WHERE account_id = ?&quot;;</span>
+        
+<span class="nc" id="L226">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L227">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L229">            stmt.setInt(1, accountId);</span>
+<span class="nc" id="L230">            ResultSet rs = stmt.executeQuery();</span>
+            
+<span class="nc bnc" id="L232" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L233">                return rs.getInt(1);</span>
+            }
+            
+<span class="nc" id="L236">            return 0;</span>
+<span class="nc bnc" id="L237" title="All 4 branches missed.">        }</span>
+    }
+    
+    /**
+     * Finds recent transactions across all accounts
+     * 
+     * @param limit Number of records
+     * @return List of recent transactions
+     * @throws SQLException if error occurs
+     */
+    public List&lt;Transaction&gt; findRecent(int limit) throws SQLException {
+<span class="nc" id="L248">        String sql = &quot;SELECT * FROM transactions ORDER BY created_at DESC LIMIT ?&quot;;</span>
+<span class="nc" id="L249">        List&lt;Transaction&gt; transactions = new ArrayList&lt;&gt;();</span>
+        
+<span class="nc" id="L251">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L252">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L254">            stmt.setInt(1, limit);</span>
+<span class="nc" id="L255">            ResultSet rs = stmt.executeQuery();</span>
+            
+<span class="nc bnc" id="L257" title="All 2 branches missed.">            while (rs.next()) {</span>
+<span class="nc" id="L258">                transactions.add(mapResultSetToTransaction(rs));</span>
+            }
+        }
+        
+<span class="nc" id="L262">        return transactions;</span>
+    }
+    
+    /**
+     * Counts total transactions
+     * 
+     * @return Total count
+     * @throws SQLException if error occurs
+     */
+    public int count() throws SQLException {
+<span class="nc" id="L272">        String sql = &quot;SELECT COUNT(*) FROM transactions&quot;;</span>
+        
+<span class="nc" id="L274">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L275">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L277">            ResultSet rs = stmt.executeQuery();</span>
+<span class="nc bnc" id="L278" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L279">                return rs.getInt(1);</span>
+            }
+            
+<span class="nc" id="L282">            return 0;</span>
+<span class="nc bnc" id="L283" title="All 4 branches missed.">        }</span>
+    }
+    
+    /**
+     * Maps ResultSet to Transaction entity
+     * 
+     * @param rs ResultSet
+     * @return Transaction entity
+     * @throws SQLException if error occurs
+     */
+    private Transaction mapResultSetToTransaction(ResultSet rs) throws SQLException {
+<span class="nc" id="L294">        Transaction transaction = new Transaction();</span>
+<span class="nc" id="L295">        transaction.setTransactionId(rs.getInt(&quot;transaction_id&quot;));</span>
+<span class="nc" id="L296">        transaction.setTransactionUuid((UUID) rs.getObject(&quot;transaction_uuid&quot;));</span>
+<span class="nc" id="L297">        transaction.setAccountId(rs.getInt(&quot;account_id&quot;));</span>
+<span class="nc" id="L298">        transaction.setTransactionType(Transaction.TransactionType.valueOf(rs.getString(&quot;transaction_type&quot;)));</span>
+<span class="nc" id="L299">        transaction.setAmount(rs.getBigDecimal(&quot;amount&quot;));</span>
+<span class="nc" id="L300">        transaction.setBalanceBefore(rs.getBigDecimal(&quot;balance_before&quot;));</span>
+<span class="nc" id="L301">        transaction.setBalanceAfter(rs.getBigDecimal(&quot;balance_after&quot;));</span>
+<span class="nc" id="L302">        transaction.setDescription(rs.getString(&quot;description&quot;));</span>
+<span class="nc" id="L303">        transaction.setReferenceNumber(rs.getString(&quot;reference_number&quot;));</span>
+        
+<span class="nc" id="L305">        Integer relatedAccountId = (Integer) rs.getObject(&quot;related_account_id&quot;);</span>
+<span class="nc" id="L306">        transaction.setRelatedAccountId(relatedAccountId);</span>
+        
+<span class="nc" id="L308">        transaction.setStatus(Transaction.TransactionStatus.valueOf(rs.getString(&quot;status&quot;)));</span>
+<span class="nc" id="L309">        transaction.setCreatedAt(rs.getTimestamp(&quot;created_at&quot;).toLocalDateTime());</span>
+        
+<span class="nc" id="L311">        return transaction;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

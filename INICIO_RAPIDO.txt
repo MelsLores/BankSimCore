@@ -1,0 +1,76 @@
+###############################################################################
+# INICIO RAPIDO - SISTEMA BANCARIO
+###############################################################################
+
+** IMPORTANTE: LEA ESTO PRIMERO **
+
+Este sistema tiene 2 modos de uso:
+
+===============================================================================
+MODO 1: INTERFAZ WEB (RECOMENDADO) ⭐
+===============================================================================
+
+Para usar la interfaz web moderna con todos los features:
+
+Windows PowerShell:
+  .\run_web.ps1
+
+Windows Command Prompt:
+  run_web.bat
+
+Luego abrir navegador en: http://localhost:8080
+
+VENTAJAS:
+- Interfaz visual moderna
+- Dashboard interactivo
+- Todos los tests visualizados
+- Facil de usar
+- No requiere conocimientos de consola
+
+
+===============================================================================
+MODO 2: CONSOLA (VERSION CLASICA)
+===============================================================================
+
+Para usar el sistema por consola tradicional:
+
+Windows PowerShell:
+  .\run_system.ps1
+
+Windows Command Prompt:
+  run_system.bat
+
+VENTAJAS:
+- Mas rapido de iniciar
+- No requiere navegador
+- Consume menos recursos
+
+
+===============================================================================
+DATOS DE EJEMPLO INCLUIDOS
+===============================================================================
+
+Cliente: CUST001
+Nombre: Juan Perez
+Clave: Abcd1234
+
+Cuenta: 123-4567-1234567890
+Saldo: $1000.00
+
+
+===============================================================================
+TESTS AUTOMATIZADOS
+===============================================================================
+
+Los 12 casos de prueba del PDF estan disponibles en ambos modos:
+- Modo Web: Tab "Tests Automatizados"
+- Modo Consola: Opcion 10 del menu
+
+
+===============================================================================
+AYUDA ADICIONAL
+===============================================================================
+
+Ver README.txt para instrucciones completas y detalladas.
+
+===============================================================================

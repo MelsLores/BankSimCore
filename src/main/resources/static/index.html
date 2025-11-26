@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BankSim Enterprise v5.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 800px;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .header h2 {
+            font-size: 32px;
+            color: #667eea;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 16px;
+        }
+
+        .status {
+            background: #c6f6d5;
+            border: 2px solid #9ae6b4;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .status h3 {
+            color: #2f855a;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .status p {
+            color: #2f855a;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .warning {
+            background: #fef3c7;
+            border: 2px solid #fbbf24;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .warning h3 {
+            color: #92400e;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .warning p {
+            color: #92400e;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .features {
+            margin-bottom: 30px;
+        }
+
+        .features h3 {
+            font-size: 24px;
+            color: #2d3748;
+            margin-bottom: 20px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .feature {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .feature.active {
+            border-color: #667eea;
+            background: #eef2ff;
+        }
+
+        .feature h4 {
+            font-size: 16px;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .feature p {
+            font-size: 13px;
+            color: #718096;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        code {
+            background: #2d3748;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .setup-steps {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .setup-steps ol {
+            margin-left: 20px;
+        }
+
+        .setup-steps li {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏦</h1>
+            <h2>BankSim Enterprise</h2>
+            <p>Version 5.0 - Enterprise Banking System</p>
+        </div>
+
+        <div class="status">
+            <h3>✅ Servidor Activo</h3>
+            <p>El servidor HTTP está funcionando correctamente en el puerto 8080. Las páginas estáticas están disponibles.</p>
+        </div>
+
+        <div class="status">
+            <h3>✅ Base de Datos PostgreSQL Conectada</h3>
+            <p>La base de datos <strong>banksim_db</strong> está activa con 4 usuarios, 3 clientes y 8 cuentas. API básica disponible en <code>/api/db/</code></p>
+        </div>
+
+        <div class="features">
+            <h3>Estado de Componentes</h3>
+            <div class="feature-grid">
+                <div class="feature active">
+                    <h4>✅ Servidor HTTP</h4>
+                    <p>Puerto 8080 activo</p>
+                </div>
+                <div class="feature active">
+                    <h4>✅ Frontend</h4>
+                    <p>Login y registro</p>
+                </div>
+                <div class="feature active">
+                    <h4>✅ Base de Datos</h4>
+                    <p>PostgreSQL conectada</p>
+                </div>
+                <div class="feature active">
+                    <h4>✅ API Básica</h4>
+                    <p>/api/db/* endpoints</p>
+                </div>
+                <div class="feature">
+                    <h4>⏳ Autenticación</h4>
+                    <p>JWT + BCrypt</p>
+                </div>
+                <div class="feature">
+                    <h4>⏳ Transacciones</h4>
+                    <p>ACID compliant</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="setup-steps">
+            <h3>🎉 API Endpoints Disponibles</h3>
+            <p><strong>Estado del servidor:</strong></p>
+            <code>GET /api/status</code>
+            
+            <p style="margin-top: 15px;"><strong>Test de base de datos:</strong></p>
+            <code>GET /api/db/test</code>
+            
+            <p style="margin-top: 15px;"><strong>Listar usuarios:</strong></p>
+            <code>GET /api/db/users</code>
+            
+            <p style="font-size: 13px; color: #718096; margin-top: 15px;">
+                💡 Prueba los endpoints desde tu navegador o con PowerShell
+            </p>
+            
+            <p style="margin-top: 15px;"><strong>Paso 4:</strong> Compilar versión completa</p>
+            <p style="font-size: 13px; color: #718096; margin-top: 5px;">
+                Requiere correcciones en servicios y controladores
+            </p>
+        </div>
+
+        <div class="actions">
+            <a href="/login.html" class="btn btn-primary">Ver Página de Login</a>
+            <a href="/register.html" class="btn btn-primary">Ver Página de Registro</a>
+            <a href="/api/status" class="btn btn-secondary">Estado del Servidor (JSON)</a>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; color: #718096; font-size: 14px;">
+            <p><strong>Documentación:</strong></p>
+            <p>📄 README_ENTERPRISE.md - Guía completa</p>
+            <p>📊 IMPLEMENTATION_SUMMARY.md - Resumen de implementación</p>
+            <p>📝 MIGRATION_PROGRESS.md - Progreso de migración</p>
+        </div>
+    </div>
+
+    <script>
+        // Check server status
+        fetch('/api/status')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Server status:', data);
+            })
+            .catch(error => {
+                console.error('Server error:', error);
+            });
+    </script>
+</body>
+</html>

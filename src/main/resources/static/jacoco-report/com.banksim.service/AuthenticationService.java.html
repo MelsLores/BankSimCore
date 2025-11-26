@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthenticationService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.banksim.service</a> &gt; <span class="el_source">AuthenticationService.java</span></div><h1>AuthenticationService.java</h1><pre class="source lang-java linenums">package com.banksim.service;
+
+import com.banksim.config.SecurityConfig;
+import com.banksim.model.Customer;
+import com.banksim.model.User;
+import com.banksim.repository.CustomerRepository;
+import com.banksim.repository.UserRepository;
+import com.banksim.util.JwtUtil;
+import com.banksim.util.PasswordUtil;
+import com.banksim.util.ValidationUtil;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+/**
+ * Authentication service for user login, registration, and JWT token management.
+ * 
+ * @author Jorge Pena - REM Consultancy
+ * @version 1.0
+ * @since 2024
+ */
+public class AuthenticationService {
+    
+    private final UserRepository userRepository;
+    private final CustomerRepository customerRepository;
+    private final SecurityConfig securityConfig;
+    
+<span class="nc" id="L29">    public AuthenticationService() {</span>
+<span class="nc" id="L30">        this.userRepository = new UserRepository();</span>
+<span class="nc" id="L31">        this.customerRepository = new CustomerRepository();</span>
+<span class="nc" id="L32">        this.securityConfig = SecurityConfig.getInstance();</span>
+<span class="nc" id="L33">    }</span>
+    
+    /**
+     * Authenticates a user and generates JWT token
+     * 
+     * @param username Username or email
+     * @param password Plain text password
+     * @return Map containing token and user information
+     * @throws AuthenticationException if authentication fails
+     */
+    public Map&lt;String, Object&gt; login(String username, String password) throws AuthenticationException {
+        try {
+            // Find user by username or email
+<span class="nc" id="L46">            Optional&lt;User&gt; userOpt = userRepository.findByUsername(username);</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">            if (!userOpt.isPresent()) {</span>
+<span class="nc" id="L48">                userOpt = userRepository.findByEmail(username);</span>
+            }
+            
+<span class="nc bnc" id="L51" title="All 2 branches missed.">            if (!userOpt.isPresent()) {</span>
+<span class="nc" id="L52">                throw new AuthenticationException(&quot;Invalid username or password&quot;);</span>
+            }
+            
+<span class="nc" id="L55">            User user = userOpt.get();</span>
+            
+            // Check if account is locked
+<span class="nc bnc" id="L58" title="All 2 branches missed.">            if (user.isLocked()) {</span>
+<span class="nc" id="L59">                throw new AuthenticationException(&quot;Account is locked. Please contact support.&quot;);</span>
+            }
+            
+            // Check if account is active
+<span class="nc bnc" id="L63" title="All 2 branches missed.">            if (!user.isActive()) {</span>
+<span class="nc" id="L64">                throw new AuthenticationException(&quot;Account is inactive&quot;);</span>
+            }
+            
+            // Verify password
+<span class="nc" id="L68">            boolean passwordValid = PasswordUtil.verifyPassword(password, user.getPasswordHash());</span>
+            
+<span class="nc bnc" id="L70" title="All 2 branches missed.">            if (!passwordValid) {</span>
+                // Increment failed attempts
+<span class="nc" id="L72">                userRepository.incrementFailedLoginAttempts(user.getUserId());</span>
+<span class="nc" id="L73">                user.incrementFailedLoginAttempts();</span>
+                
+                // Lock account if max attempts reached
+<span class="nc bnc" id="L76" title="All 2 branches missed.">                if (user.getFailedLoginAttempts() &gt;= securityConfig.getMaxFailedAttempts()) {</span>
+<span class="nc" id="L77">                    userRepository.lockAccount(user.getUserId());</span>
+<span class="nc" id="L78">                    throw new AuthenticationException(&quot;Account locked due to too many failed attempts&quot;);</span>
+                }
+                
+<span class="nc" id="L81">                throw new AuthenticationException(&quot;Invalid username or password&quot;);</span>
+            }
+            
+            // Reset failed attempts on successful login
+<span class="nc" id="L85">            userRepository.resetFailedLoginAttempts(user.getUserId());</span>
+<span class="nc" id="L86">            userRepository.updateLastLogin(user.getUserId());</span>
+            
+            // Generate JWT token
+<span class="nc" id="L89">            String accessToken = JwtUtil.generateToken(user.getUserId(), user.getUsername(), user.getRole().name());</span>
+<span class="nc" id="L90">            String refreshToken = JwtUtil.generateRefreshToken(user.getUserId(), user.getUsername(), user.getRole().name());</span>
+            
+            // Build response
+<span class="nc" id="L93">            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L94">            response.put(&quot;accessToken&quot;, accessToken);</span>
+<span class="nc" id="L95">            response.put(&quot;refreshToken&quot;, refreshToken);</span>
+<span class="nc" id="L96">            response.put(&quot;userId&quot;, user.getUserId());</span>
+<span class="nc" id="L97">            response.put(&quot;username&quot;, user.getUsername());</span>
+<span class="nc" id="L98">            response.put(&quot;email&quot;, user.getEmail());</span>
+<span class="nc" id="L99">            response.put(&quot;role&quot;, user.getRole().name());</span>
+<span class="nc" id="L100">            response.put(&quot;expiresIn&quot;, securityConfig.getJwtExpiration());</span>
+            
+<span class="nc" id="L102">            return response;</span>
+            
+<span class="nc" id="L104">        } catch (SQLException e) {</span>
+<span class="nc" id="L105">            throw new AuthenticationException(&quot;Database error during login: &quot; + e.getMessage());</span>
+        }
+    }
+    
+    /**
+     * Registers a new user and customer
+     * 
+     * @param username Username
+     * @param email Email address
+     * @param password Plain text password
+     * @param firstName First name
+     * @param lastName Last name
+     * @param personalKey Personal key for additional security
+     * @param phone Phone number
+     * @return Map containing token and user information
+     * @throws AuthenticationException if registration fails
+     */
+    public Map&lt;String, Object&gt; register(String username, String email, String password,
+                                        String firstName, String lastName, String personalKey,
+                                        String phone) throws AuthenticationException {
+        try {
+            // Validate inputs
+<span class="nc" id="L127">            validateRegistrationInputs(username, email, password, personalKey);</span>
+            
+            // Check if username exists
+<span class="nc bnc" id="L130" title="All 2 branches missed.">            if (userRepository.existsByUsername(username)) {</span>
+<span class="nc" id="L131">                throw new AuthenticationException(&quot;Username already exists&quot;);</span>
+            }
+            
+            // Check if email exists
+<span class="nc bnc" id="L135" title="All 2 branches missed.">            if (userRepository.existsByEmail(email)) {</span>
+<span class="nc" id="L136">                throw new AuthenticationException(&quot;Email already exists&quot;);</span>
+            }
+            
+            // Hash password
+<span class="nc" id="L140">            String passwordHash = PasswordUtil.hashPassword(password);</span>
+<span class="nc" id="L141">            String salt = PasswordUtil.generateSalt();</span>
+            
+            // Create user
+<span class="nc" id="L144">            User user = new User(username, email, passwordHash, salt, User.Role.CUSTOMER);</span>
+<span class="nc" id="L145">            user = userRepository.create(user);</span>
+            
+            // Generate customer code
+<span class="nc" id="L148">            String customerCode = customerRepository.generateCustomerCode();</span>
+            
+            // Hash personal key
+<span class="nc" id="L151">            String personalKeyHash = PasswordUtil.hashPassword(personalKey);</span>
+            
+            // Create customer
+<span class="nc" id="L154">            Customer customer = new Customer(user.getUserId(), customerCode, firstName, lastName, personalKeyHash);</span>
+<span class="nc" id="L155">            customer.setPhone(phone);</span>
+<span class="nc" id="L156">            customer = customerRepository.create(customer);</span>
+            
+            // Generate JWT token
+<span class="nc" id="L159">            String accessToken = JwtUtil.generateToken(user.getUserId(), user.getUsername(), user.getRole().name());</span>
+<span class="nc" id="L160">            String refreshToken = JwtUtil.generateRefreshToken(user.getUserId(), user.getUsername(), user.getRole().name());</span>
+            
+            // Build response
+<span class="nc" id="L163">            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L164">            response.put(&quot;accessToken&quot;, accessToken);</span>
+<span class="nc" id="L165">            response.put(&quot;refreshToken&quot;, refreshToken);</span>
+<span class="nc" id="L166">            response.put(&quot;userId&quot;, user.getUserId());</span>
+<span class="nc" id="L167">            response.put(&quot;username&quot;, user.getUsername());</span>
+<span class="nc" id="L168">            response.put(&quot;email&quot;, user.getEmail());</span>
+<span class="nc" id="L169">            response.put(&quot;role&quot;, user.getRole().name());</span>
+<span class="nc" id="L170">            response.put(&quot;customerId&quot;, customer.getCustomerId());</span>
+<span class="nc" id="L171">            response.put(&quot;customerCode&quot;, customer.getCustomerCode());</span>
+<span class="nc" id="L172">            response.put(&quot;expiresIn&quot;, securityConfig.getJwtExpiration());</span>
+            
+<span class="nc" id="L174">            return response;</span>
+            
+<span class="nc" id="L176">        } catch (SQLException e) {</span>
+<span class="nc" id="L177">            throw new AuthenticationException(&quot;Database error during registration: &quot; + e.getMessage());</span>
+        }
+    }
+    
+    /**
+     * Refreshes an access token using a refresh token
+     * 
+     * @param refreshToken Refresh token
+     * @return Map containing new access token
+     * @throws AuthenticationException if refresh fails
+     */
+    public Map&lt;String, Object&gt; refreshToken(String refreshToken) throws AuthenticationException {
+        try {
+            // Validate refresh token
+<span class="nc bnc" id="L191" title="All 2 branches missed.">            if (!JwtUtil.validateToken(refreshToken)) {</span>
+<span class="nc" id="L192">                throw new AuthenticationException(&quot;Invalid or expired refresh token&quot;);</span>
+            }
+            
+            // Extract user information
+<span class="nc" id="L196">            Integer userId = JwtUtil.getUserId(refreshToken);</span>
+<span class="nc" id="L197">            String username = JwtUtil.getUsername(refreshToken);</span>
+<span class="nc" id="L198">            String role = JwtUtil.getRole(refreshToken);</span>
+            
+<span class="nc bnc" id="L200" title="All 6 branches missed.">            if (userId == null || username == null || role == null) {</span>
+<span class="nc" id="L201">                throw new AuthenticationException(&quot;Invalid token claims&quot;);</span>
+            }
+            
+            // Verify user still exists and is active
+<span class="nc" id="L205">            Optional&lt;User&gt; userOpt = userRepository.findById(userId);</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">            if (!userOpt.isPresent()) {</span>
+<span class="nc" id="L207">                throw new AuthenticationException(&quot;User not found&quot;);</span>
+            }
+            
+<span class="nc" id="L210">            User user = userOpt.get();</span>
+<span class="nc bnc" id="L211" title="All 4 branches missed.">            if (!user.isActive() || user.isLocked()) {</span>
+<span class="nc" id="L212">                throw new AuthenticationException(&quot;User account is not active&quot;);</span>
+            }
+            
+            // Generate new access token
+<span class="nc" id="L216">            String newAccessToken = JwtUtil.generateToken(userId, username, role);</span>
+            
+<span class="nc" id="L218">            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L219">            response.put(&quot;accessToken&quot;, newAccessToken);</span>
+<span class="nc" id="L220">            response.put(&quot;expiresIn&quot;, securityConfig.getJwtExpiration());</span>
+            
+<span class="nc" id="L222">            return response;</span>
+            
+<span class="nc" id="L224">        } catch (SQLException e) {</span>
+<span class="nc" id="L225">            throw new AuthenticationException(&quot;Database error during token refresh: &quot; + e.getMessage());</span>
+        }
+    }
+    
+    /**
+     * Validates JWT token
+     * 
+     * @param token JWT token
+     * @return true if valid, false otherwise
+     */
+    public boolean validateToken(String token) {
+<span class="nc" id="L236">        return JwtUtil.validateToken(token);</span>
+    }
+    
+    /**
+     * Extracts user ID from token
+     * 
+     * @param token JWT token
+     * @return User ID
+     */
+    public Integer getUserIdFromToken(String token) {
+<span class="nc" id="L246">        return JwtUtil.getUserId(token);</span>
+    }
+    
+    /**
+     * Changes user password
+     * 
+     * @param userId User ID
+     * @param oldPassword Current password
+     * @param newPassword New password
+     * @throws AuthenticationException if password change fails
+     */
+    public void changePassword(Integer userId, String oldPassword, String newPassword) throws AuthenticationException {
+        try {
+            // Find user
+<span class="nc" id="L260">            Optional&lt;User&gt; userOpt = userRepository.findById(userId);</span>
+<span class="nc bnc" id="L261" title="All 2 branches missed.">            if (!userOpt.isPresent()) {</span>
+<span class="nc" id="L262">                throw new AuthenticationException(&quot;User not found&quot;);</span>
+            }
+            
+<span class="nc" id="L265">            User user = userOpt.get();</span>
+            
+            // Verify old password
+<span class="nc bnc" id="L268" title="All 2 branches missed.">            if (!PasswordUtil.verifyPassword(oldPassword, user.getPasswordHash())) {</span>
+<span class="nc" id="L269">                throw new AuthenticationException(&quot;Current password is incorrect&quot;);</span>
+            }
+            
+            // Validate new password
+<span class="nc bnc" id="L273" title="All 2 branches missed.">            if (!PasswordUtil.isStrongPassword(newPassword)) {</span>
+<span class="nc" id="L274">                throw new AuthenticationException(&quot;New password does not meet strength requirements&quot;);</span>
+            }
+            
+            // Hash new password
+<span class="nc" id="L278">            String newPasswordHash = PasswordUtil.hashPassword(newPassword);</span>
+<span class="nc" id="L279">            String newSalt = PasswordUtil.generateSalt();</span>
+            
+<span class="nc" id="L281">            user.setPasswordHash(newPasswordHash);</span>
+<span class="nc" id="L282">            user.setSalt(newSalt);</span>
+            
+<span class="nc" id="L284">            userRepository.update(user);</span>
+            
+<span class="nc" id="L286">        } catch (SQLException e) {</span>
+<span class="nc" id="L287">            throw new AuthenticationException(&quot;Database error during password change: &quot; + e.getMessage());</span>
+<span class="nc" id="L288">        }</span>
+<span class="nc" id="L289">    }</span>
+    
+    /**
+     * Validates registration inputs
+     * 
+     * @param username Username
+     * @param email Email
+     * @param password Password
+     * @param personalKey Personal key
+     * @throws AuthenticationException if validation fails
+     */
+    private void validateRegistrationInputs(String username, String email, String password, String personalKey) 
+            throws AuthenticationException {
+        
+<span class="nc bnc" id="L303" title="All 2 branches missed.">        if (!ValidationUtil.isValidUsername(username)) {</span>
+<span class="nc" id="L304">            throw new AuthenticationException(&quot;Invalid username format. Must be 3-50 alphanumeric characters.&quot;);</span>
+        }
+        
+<span class="nc bnc" id="L307" title="All 2 branches missed.">        if (!ValidationUtil.isValidEmail(email)) {</span>
+<span class="nc" id="L308">            throw new AuthenticationException(&quot;Invalid email format&quot;);</span>
+        }
+        
+<span class="nc bnc" id="L311" title="All 2 branches missed.">        if (!PasswordUtil.isStrongPassword(password)) {</span>
+<span class="nc" id="L312">            throw new AuthenticationException(</span>
+                &quot;Password must be at least 8 characters with uppercase, lowercase, and digit&quot;
+            );
+        }
+        
+<span class="nc bnc" id="L317" title="All 2 branches missed.">        if (!ValidationUtil.isValidPersonalKey(personalKey)) {</span>
+<span class="nc" id="L318">            throw new AuthenticationException(ValidationUtil.getPersonalKeyError(personalKey));</span>
+        }
+<span class="nc" id="L320">    }</span>
+    
+    /**
+     * Custom exception for authentication errors
+     */
+    public static class AuthenticationException extends Exception {
+        public AuthenticationException(String message) {
+<span class="nc" id="L327">            super(message);</span>
+<span class="nc" id="L328">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

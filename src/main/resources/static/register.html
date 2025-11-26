@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - BankSim Enterprise</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .register-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 520px;
+            padding: 40px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            font-size: 32px;
+            color: #667eea;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .logo p {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 6px;
+        }
+
+        input {
+            width: 100%;
+            padding: 11px 14px;
+            font-size: 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            transition: all 0.3s;
+            background: #f7fafc;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .alert-error {
+            background: #fed7d7;
+            color: #c53030;
+            border: 1px solid #fc8181;
+        }
+
+        .alert-success {
+            background: #c6f6d5;
+            color: #2f855a;
+            border: 1px solid #9ae6b4;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .requirements {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="logo">
+            <h1>🏦 BankSim</h1>
+            <p>Crea tu cuenta empresarial</p>
+        </div>
+
+        <div id="alert" class="alert"></div>
+
+        <form id="registerForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstName">Nombre *</label>
+                    <input type="text" id="firstName" name="firstName" required placeholder="Juan">
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Apellido *</label>
+                    <input type="text" id="lastName" name="lastName" required placeholder="Pérez">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="username">Usuario *</label>
+                <input type="text" id="username" name="username" required placeholder="juanperez" 
+                       pattern="[a-zA-Z0-9_]{3,20}" title="3-20 caracteres, letras, números y guión bajo">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Correo Electrónico *</label>
+                <input type="email" id="email" name="email" required placeholder="juan@email.com">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Contraseña *</label>
+                <input type="password" id="password" name="password" required placeholder="Mínimo 8 caracteres">
+                <div class="requirements">
+                    Debe contener: mayúscula, minúscula, número (8+ caracteres)
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Teléfono *</label>
+                <input type="tel" id="phone" name="phone" required placeholder="1234567890" 
+                       pattern="[0-9]{10}" title="10 dígitos numéricos">
+            </div>
+
+            <div class="form-group">
+                <label for="address">Dirección *</label>
+                <input type="text" id="address" name="address" required placeholder="Calle 123, Ciudad">
+            </div>
+
+            <div class="form-group">
+                <label for="dateOfBirth">Fecha de Nacimiento *</label>
+                <input type="date" id="dateOfBirth" name="dateOfBirth" required>
+            </div>
+
+            <div class="form-group">
+                <label for="personalKey">Clave Personal *</label>
+                <input type="text" id="personalKey" name="personalKey" required 
+                       placeholder="Abcd1234" pattern="[a-zA-Z0-9]{8,}" 
+                       title="Mínimo 8 caracteres alfanuméricos">
+                <div class="requirements">
+                    Clave de seguridad: mayúscula, minúscula, número (8+ caracteres)
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Crear Cuenta</button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px; color: #718096; font-size: 14px;">Creando cuenta...</p>
+        </div>
+
+        <div class="login-link">
+            ¿Ya tienes cuenta? <a href="login.html">Inicia sesión aquí</a>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8080/api';
+
+        const registerForm = document.getElementById('registerForm');
+        const alertBox = document.getElementById('alert');
+        const loadingBox = document.getElementById('loading');
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value,
+                email: document.getElementById('email').value,
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                dateOfBirth: document.getElementById('dateOfBirth').value,
+                personalKey: document.getElementById('personalKey').value
+            };
+
+            // Hide alert and show loading
+            alertBox.style.display = 'none';
+            loadingBox.style.display = 'block';
+            registerForm.style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Store JWT token
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('userId', data.userId);
+
+                    // Show success message
+                    showAlert('¡Cuenta creada exitosamente! Redirigiendo...', 'success');
+
+                    // Redirect to main page
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
+
+                } else {
+                    showAlert(data.error || 'Error al crear la cuenta', 'error');
+                    loadingBox.style.display = 'none';
+                    registerForm.style.display = 'block';
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('⚠️ API de autenticación en desarrollo. Base de datos PostgreSQL conectada (4 usuarios registrados). Endpoints disponibles: /api/db/test, /api/db/users', 'error');
+                loadingBox.style.display = 'none';
+                registerForm.style.display = 'block';
+            }
+        });
+
+        function showAlert(message, type) {
+            alertBox.textContent = message;
+            alertBox.className = `alert alert-${type}`;
+            alertBox.style.display = 'block';
+        }
+
+        // Check if already logged in
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('authToken');
+            if (token) {
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>

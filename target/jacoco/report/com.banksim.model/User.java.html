@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>User.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.banksim.model</a> &gt; <span class="el_source">User.java</span></div><h1>User.java</h1><pre class="source lang-java linenums">package com.banksim.model;
+
+import java.time.LocalDateTime;
+
+/**
+ * User entity representing authenticated users in the system.
+ * Supports role-based access control (RBAC) with three roles: ADMIN, CUSTOMER, EMPLOYEE.
+ * 
+ * @author Jorge Pena - REM Consultancy
+ * @version 1.0
+ * @since 2024
+ */
+public class User {
+    
+    /**
+     * User role enumeration
+     */
+<span class="nc" id="L18">    public enum Role {</span>
+<span class="nc" id="L19">        ADMIN,</span>
+<span class="nc" id="L20">        CUSTOMER,</span>
+<span class="nc" id="L21">        EMPLOYEE</span>
+    }
+    
+    private Integer userId;
+    private String username;
+    private String email;
+    private String passwordHash;
+    private String salt;
+    private Role role;
+    private boolean isActive;
+    private boolean isLocked;
+    private int failedLoginAttempts;
+    private LocalDateTime lastLogin;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    
+    /**
+     * Default constructor
+     */
+<span class="nc" id="L40">    public User() {</span>
+<span class="nc" id="L41">        this.isActive = true;</span>
+<span class="nc" id="L42">        this.isLocked = false;</span>
+<span class="nc" id="L43">        this.failedLoginAttempts = 0;</span>
+<span class="nc" id="L44">        this.role = Role.CUSTOMER;</span>
+<span class="nc" id="L45">        this.createdAt = LocalDateTime.now();</span>
+<span class="nc" id="L46">        this.updatedAt = LocalDateTime.now();</span>
+<span class="nc" id="L47">    }</span>
+    
+    /**
+     * Parameterized constructor for user creation
+     * 
+     * @param username Unique username
+     * @param email User email address
+     * @param passwordHash BCrypt hashed password
+     * @param salt Password salt
+     * @param role User role
+     */
+    public User(String username, String email, String passwordHash, String salt, Role role) {
+<span class="nc" id="L59">        this();</span>
+<span class="nc" id="L60">        this.username = username;</span>
+<span class="nc" id="L61">        this.email = email;</span>
+<span class="nc" id="L62">        this.passwordHash = passwordHash;</span>
+<span class="nc" id="L63">        this.salt = salt;</span>
+<span class="nc" id="L64">        this.role = role;</span>
+<span class="nc" id="L65">    }</span>
+    
+    // Getters and Setters
+    
+    /**
+     * Gets the user ID
+     * @return User ID
+     */
+    public Integer getUserId() {
+<span class="nc" id="L74">        return userId;</span>
+    }
+    
+    /**
+     * Sets the user ID
+     * @param userId User ID
+     */
+    public void setUserId(Integer userId) {
+<span class="nc" id="L82">        this.userId = userId;</span>
+<span class="nc" id="L83">    }</span>
+    
+    /**
+     * Gets the username
+     * @return Username
+     */
+    public String getUsername() {
+<span class="nc" id="L90">        return username;</span>
+    }
+    
+    /**
+     * Sets the username
+     * @param username Unique username
+     */
+    public void setUsername(String username) {
+<span class="nc" id="L98">        this.username = username;</span>
+<span class="nc" id="L99">    }</span>
+    
+    /**
+     * Gets the email address
+     * @return Email
+     */
+    public String getEmail() {
+<span class="nc" id="L106">        return email;</span>
+    }
+    
+    /**
+     * Sets the email address
+     * @param email User email
+     */
+    public void setEmail(String email) {
+<span class="nc" id="L114">        this.email = email;</span>
+<span class="nc" id="L115">    }</span>
+    
+    /**
+     * Gets the password hash
+     * @return BCrypt password hash
+     */
+    public String getPasswordHash() {
+<span class="nc" id="L122">        return passwordHash;</span>
+    }
+    
+    /**
+     * Sets the password hash
+     * @param passwordHash BCrypt hashed password
+     */
+    public void setPasswordHash(String passwordHash) {
+<span class="nc" id="L130">        this.passwordHash = passwordHash;</span>
+<span class="nc" id="L131">    }</span>
+    
+    /**
+     * Gets the password salt
+     * @return Password salt
+     */
+    public String getSalt() {
+<span class="nc" id="L138">        return salt;</span>
+    }
+    
+    /**
+     * Sets the password salt
+     * @param salt Password salt
+     */
+    public void setSalt(String salt) {
+<span class="nc" id="L146">        this.salt = salt;</span>
+<span class="nc" id="L147">    }</span>
+    
+    /**
+     * Gets the user role
+     * @return User role (ADMIN, CUSTOMER, EMPLOYEE)
+     */
+    public Role getRole() {
+<span class="nc" id="L154">        return role;</span>
+    }
+    
+    /**
+     * Sets the user role
+     * @param role User role
+     */
+    public void setRole(Role role) {
+<span class="nc" id="L162">        this.role = role;</span>
+<span class="nc" id="L163">    }</span>
+    
+    /**
+     * Checks if user is active
+     * @return true if active, false otherwise
+     */
+    public boolean isActive() {
+<span class="nc" id="L170">        return isActive;</span>
+    }
+    
+    /**
+     * Sets user active status
+     * @param active Active status
+     */
+    public void setActive(boolean active) {
+<span class="nc" id="L178">        isActive = active;</span>
+<span class="nc" id="L179">    }</span>
+    
+    /**
+     * Checks if user account is locked
+     * @return true if locked, false otherwise
+     */
+    public boolean isLocked() {
+<span class="nc" id="L186">        return isLocked;</span>
+    }
+    
+    /**
+     * Sets user account locked status
+     * @param locked Locked status
+     */
+    public void setLocked(boolean locked) {
+<span class="nc" id="L194">        isLocked = locked;</span>
+<span class="nc" id="L195">    }</span>
+    
+    /**
+     * Gets failed login attempts count
+     * @return Number of failed attempts
+     */
+    public int getFailedLoginAttempts() {
+<span class="nc" id="L202">        return failedLoginAttempts;</span>
+    }
+    
+    /**
+     * Sets failed login attempts count
+     * @param failedLoginAttempts Number of failed attempts
+     */
+    public void setFailedLoginAttempts(int failedLoginAttempts) {
+<span class="nc" id="L210">        this.failedLoginAttempts = failedLoginAttempts;</span>
+<span class="nc" id="L211">    }</span>
+    
+    /**
+     * Increments failed login attempts
+     */
+    public void incrementFailedLoginAttempts() {
+<span class="nc" id="L217">        this.failedLoginAttempts++;</span>
+<span class="nc" id="L218">    }</span>
+    
+    /**
+     * Resets failed login attempts to zero
+     */
+    public void resetFailedLoginAttempts() {
+<span class="nc" id="L224">        this.failedLoginAttempts = 0;</span>
+<span class="nc" id="L225">    }</span>
+    
+    /**
+     * Gets last login timestamp
+     * @return Last login date/time
+     */
+    public LocalDateTime getLastLogin() {
+<span class="nc" id="L232">        return lastLogin;</span>
+    }
+    
+    /**
+     * Sets last login timestamp
+     * @param lastLogin Last login date/time
+     */
+    public void setLastLogin(LocalDateTime lastLogin) {
+<span class="nc" id="L240">        this.lastLogin = lastLogin;</span>
+<span class="nc" id="L241">    }</span>
+    
+    /**
+     * Gets creation timestamp
+     * @return Created date/time
+     */
+    public LocalDateTime getCreatedAt() {
+<span class="nc" id="L248">        return createdAt;</span>
+    }
+    
+    /**
+     * Sets creation timestamp
+     * @param createdAt Created date/time
+     */
+    public void setCreatedAt(LocalDateTime createdAt) {
+<span class="nc" id="L256">        this.createdAt = createdAt;</span>
+<span class="nc" id="L257">    }</span>
+    
+    /**
+     * Gets last update timestamp
+     * @return Updated date/time
+     */
+    public LocalDateTime getUpdatedAt() {
+<span class="nc" id="L264">        return updatedAt;</span>
+    }
+    
+    /**
+     * Sets last update timestamp
+     * @param updatedAt Updated date/time
+     */
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+<span class="nc" id="L272">        this.updatedAt = updatedAt;</span>
+<span class="nc" id="L273">    }</span>
+    
+    /**
+     * Checks if user has admin privileges
+     * @return true if user is admin, false otherwise
+     */
+    public boolean isAdmin() {
+<span class="nc bnc" id="L280" title="All 2 branches missed.">        return this.role == Role.ADMIN;</span>
+    }
+    
+    /**
+     * Checks if user is a customer
+     * @return true if user is customer, false otherwise
+     */
+    public boolean isCustomer() {
+<span class="nc bnc" id="L288" title="All 2 branches missed.">        return this.role == Role.CUSTOMER;</span>
+    }
+    
+    /**
+     * Checks if user is an employee
+     * @return true if user is employee, false otherwise
+     */
+    public boolean isEmployee() {
+<span class="nc bnc" id="L296" title="All 2 branches missed.">        return this.role == Role.EMPLOYEE;</span>
+    }
+    
+    @Override
+    public String toString() {
+<span class="nc" id="L301">        return &quot;User{&quot; +</span>
+                &quot;userId=&quot; + userId +
+                &quot;, username='&quot; + username + '\'' +
+                &quot;, email='&quot; + email + '\'' +
+                &quot;, role=&quot; + role +
+                &quot;, isActive=&quot; + isActive +
+                &quot;, isLocked=&quot; + isLocked +
+                '}';
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
