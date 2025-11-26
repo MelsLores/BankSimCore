@@ -2,7 +2,7 @@
 
 ## 🎥 Demo Video - Test Execution & Simulator
 
-https://github.com/user-attachments/assets/2025-11-26-04-20-30.mp4
+<video src="2025-11-26 04-20-30.mp4" controls width="100%"></video>
 
 > Video showing comprehensive test execution (72 tests) and interactive banking simulator in action
 
