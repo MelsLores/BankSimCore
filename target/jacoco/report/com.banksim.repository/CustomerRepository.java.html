@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomerRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.banksim.repository</a> &gt; <span class="el_source">CustomerRepository.java</span></div><h1>CustomerRepository.java</h1><pre class="source lang-java linenums">package com.banksim.repository;
+
+import com.banksim.config.DatabaseConfig;
+import com.banksim.model.Customer;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Repository for Customer entity data access operations.
+ * 
+ * @author Jorge Pena - REM Consultancy
+ * @version 1.0
+ * @since 2024
+ */
+public class CustomerRepository {
+    
+    private final DatabaseConfig dbConfig;
+    
+<span class="nc" id="L21">    public CustomerRepository() {</span>
+<span class="nc" id="L22">        this.dbConfig = DatabaseConfig.getInstance();</span>
+<span class="nc" id="L23">    }</span>
+    
+    /**
+     * Creates a new customer
+     * 
+     * @param customer Customer entity
+     * @return Created customer with ID
+     * @throws SQLException if error occurs
+     */
+    public Customer create(Customer customer) throws SQLException {
+<span class="nc" id="L33">        String sql = &quot;INSERT INTO customers (user_id, customer_code, first_name, last_name, personal_key_hash, &quot; +</span>
+                     &quot;phone, address, date_of_birth, identification_number, is_verified) &quot; +
+                     &quot;VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING customer_id, created_at, updated_at&quot;;
+        
+<span class="nc" id="L37">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L38">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L40">            stmt.setInt(1, customer.getUserId());</span>
+<span class="nc" id="L41">            stmt.setString(2, customer.getCustomerCode());</span>
+<span class="nc" id="L42">            stmt.setString(3, customer.getFirstName());</span>
+<span class="nc" id="L43">            stmt.setString(4, customer.getLastName());</span>
+<span class="nc" id="L44">            stmt.setString(5, customer.getPersonalKeyHash());</span>
+<span class="nc" id="L45">            stmt.setString(6, customer.getPhone());</span>
+<span class="nc" id="L46">            stmt.setString(7, customer.getAddress());</span>
+            
+<span class="nc bnc" id="L48" title="All 2 branches missed.">            if (customer.getDateOfBirth() != null) {</span>
+<span class="nc" id="L49">                stmt.setDate(8, Date.valueOf(customer.getDateOfBirth()));</span>
+            } else {
+<span class="nc" id="L51">                stmt.setNull(8, Types.DATE);</span>
+            }
+            
+<span class="nc" id="L54">            stmt.setString(9, customer.getIdentificationNumber());</span>
+<span class="nc" id="L55">            stmt.setBoolean(10, customer.isVerified());</span>
+            
+<span class="nc" id="L57">            ResultSet rs = stmt.executeQuery();</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L59">                customer.setCustomerId(rs.getInt(&quot;customer_id&quot;));</span>
+<span class="nc" id="L60">                customer.setCreatedAt(rs.getTimestamp(&quot;created_at&quot;).toLocalDateTime());</span>
+<span class="nc" id="L61">                customer.setUpdatedAt(rs.getTimestamp(&quot;updated_at&quot;).toLocalDateTime());</span>
+            }
+            
+<span class="nc" id="L64">            return customer;</span>
+        }
+    }
+    
+    /**
+     * Finds customer by ID
+     * 
+     * @param customerId Customer ID
+     * @return Optional with customer
+     * @throws SQLException if error occurs
+     */
+    public Optional&lt;Customer&gt; findById(Integer customerId) throws SQLException {
+<span class="nc" id="L76">        String sql = &quot;SELECT * FROM customers WHERE customer_id = ?&quot;;</span>
+        
+<span class="nc" id="L78">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L79">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L81">            stmt.setInt(1, customerId);</span>
+<span class="nc" id="L82">            ResultSet rs = stmt.executeQuery();</span>
+            
+<span class="nc bnc" id="L84" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L85">                return Optional.of(mapResultSetToCustomer(rs));</span>
+            }
+            
+<span class="nc" id="L88">            return Optional.empty();</span>
+<span class="nc bnc" id="L89" title="All 4 branches missed.">        }</span>
+    }
+    
+    /**
+     * Finds customer by user ID
+     * 
+     * @param userId User ID
+     * @return Optional with customer
+     * @throws SQLException if error occurs
+     */
+    public Optional&lt;Customer&gt; findByUserId(Integer userId) throws SQLException {
+<span class="nc" id="L100">        String sql = &quot;SELECT * FROM customers WHERE user_id = ?&quot;;</span>
+        
+<span class="nc" id="L102">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L103">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L105">            stmt.setInt(1, userId);</span>
+<span class="nc" id="L106">            ResultSet rs = stmt.executeQuery();</span>
+            
+<span class="nc bnc" id="L108" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L109">                return Optional.of(mapResultSetToCustomer(rs));</span>
+            }
+            
+<span class="nc" id="L112">            return Optional.empty();</span>
+<span class="nc bnc" id="L113" title="All 4 branches missed.">        }</span>
+    }
+    
+    /**
+     * Finds customer by customer code
+     * 
+     * @param customerCode Customer code
+     * @return Optional with customer
+     * @throws SQLException if error occurs
+     */
+    public Optional&lt;Customer&gt; findByCustomerCode(String customerCode) throws SQLException {
+<span class="nc" id="L124">        String sql = &quot;SELECT * FROM customers WHERE customer_code = ?&quot;;</span>
+        
+<span class="nc" id="L126">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L127">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L129">            stmt.setString(1, customerCode);</span>
+<span class="nc" id="L130">            ResultSet rs = stmt.executeQuery();</span>
+            
+<span class="nc bnc" id="L132" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L133">                return Optional.of(mapResultSetToCustomer(rs));</span>
+            }
+            
+<span class="nc" id="L136">            return Optional.empty();</span>
+<span class="nc bnc" id="L137" title="All 4 branches missed.">        }</span>
+    }
+    
+    /**
+     * Updates customer information
+     * 
+     * @param customer Customer with updates
+     * @return Updated customer
+     * @throws SQLException if error occurs
+     */
+    public Customer update(Customer customer) throws SQLException {
+<span class="nc" id="L148">        String sql = &quot;UPDATE customers SET first_name = ?, last_name = ?, personal_key_hash = ?, &quot; +</span>
+                     &quot;phone = ?, address = ?, date_of_birth = ?, identification_number = ?, is_verified = ? &quot; +
+                     &quot;WHERE customer_id = ?&quot;;
+        
+<span class="nc" id="L152">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L153">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L155">            stmt.setString(1, customer.getFirstName());</span>
+<span class="nc" id="L156">            stmt.setString(2, customer.getLastName());</span>
+<span class="nc" id="L157">            stmt.setString(3, customer.getPersonalKeyHash());</span>
+<span class="nc" id="L158">            stmt.setString(4, customer.getPhone());</span>
+<span class="nc" id="L159">            stmt.setString(5, customer.getAddress());</span>
+            
+<span class="nc bnc" id="L161" title="All 2 branches missed.">            if (customer.getDateOfBirth() != null) {</span>
+<span class="nc" id="L162">                stmt.setDate(6, Date.valueOf(customer.getDateOfBirth()));</span>
+            } else {
+<span class="nc" id="L164">                stmt.setNull(6, Types.DATE);</span>
+            }
+            
+<span class="nc" id="L167">            stmt.setString(7, customer.getIdentificationNumber());</span>
+<span class="nc" id="L168">            stmt.setBoolean(8, customer.isVerified());</span>
+<span class="nc" id="L169">            stmt.setInt(9, customer.getCustomerId());</span>
+            
+<span class="nc" id="L171">            stmt.executeUpdate();</span>
+<span class="nc" id="L172">            return customer;</span>
+        }
+    }
+    
+    /**
+     * Retrieves all customers
+     * 
+     * @return List of all customers
+     * @throws SQLException if error occurs
+     */
+    public List&lt;Customer&gt; findAll() throws SQLException {
+<span class="nc" id="L183">        String sql = &quot;SELECT * FROM customers ORDER BY created_at DESC&quot;;</span>
+<span class="nc" id="L184">        List&lt;Customer&gt; customers = new ArrayList&lt;&gt;();</span>
+        
+<span class="nc" id="L186">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L187">             Statement stmt = conn.createStatement()) {</span>
+            
+<span class="nc" id="L189">            ResultSet rs = stmt.executeQuery(sql);</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">            while (rs.next()) {</span>
+<span class="nc" id="L191">                customers.add(mapResultSetToCustomer(rs));</span>
+            }
+        }
+        
+<span class="nc" id="L195">        return customers;</span>
+    }
+    
+    /**
+     * Retrieves all customers with pagination
+     * 
+     * @param limit Records to return
+     * @param offset Records to skip
+     * @return List of customers
+     * @throws SQLException if error occurs
+     */
+    public List&lt;Customer&gt; findAll(int limit, int offset) throws SQLException {
+<span class="nc" id="L207">        String sql = &quot;SELECT * FROM customers ORDER BY created_at DESC LIMIT ? OFFSET ?&quot;;</span>
+<span class="nc" id="L208">        List&lt;Customer&gt; customers = new ArrayList&lt;&gt;();</span>
+        
+<span class="nc" id="L210">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L211">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L213">            stmt.setInt(1, limit);</span>
+<span class="nc" id="L214">            stmt.setInt(2, offset);</span>
+            
+<span class="nc" id="L216">            ResultSet rs = stmt.executeQuery();</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">            while (rs.next()) {</span>
+<span class="nc" id="L218">                customers.add(mapResultSetToCustomer(rs));</span>
+            }
+        }
+        
+<span class="nc" id="L222">        return customers;</span>
+    }
+    
+    /**
+     * Counts total customers
+     * 
+     * @return Total count
+     * @throws SQLException if error occurs
+     */
+    public int count() throws SQLException {
+<span class="nc" id="L232">        String sql = &quot;SELECT COUNT(*) FROM customers&quot;;</span>
+        
+<span class="nc" id="L234">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L235">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L237">            ResultSet rs = stmt.executeQuery();</span>
+<span class="nc bnc" id="L238" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L239">                return rs.getInt(1);</span>
+            }
+            
+<span class="nc" id="L242">            return 0;</span>
+<span class="nc bnc" id="L243" title="All 4 branches missed.">        }</span>
+    }
+    
+    /**
+     * Checks if customer code exists
+     * 
+     * @param customerCode Code to check
+     * @return true if exists
+     * @throws SQLException if error occurs
+     */
+    public boolean existsByCustomerCode(String customerCode) throws SQLException {
+<span class="nc" id="L254">        String sql = &quot;SELECT COUNT(*) FROM customers WHERE customer_code = ?&quot;;</span>
+        
+<span class="nc" id="L256">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L257">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L259">            stmt.setString(1, customerCode);</span>
+<span class="nc" id="L260">            ResultSet rs = stmt.executeQuery();</span>
+            
+<span class="nc bnc" id="L262" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc bnc" id="L263" title="All 2 branches missed.">                return rs.getInt(1) &gt; 0;</span>
+            }
+            
+<span class="nc" id="L266">            return false;</span>
+<span class="nc bnc" id="L267" title="All 4 branches missed.">        }</span>
+    }
+    
+    /**
+     * Generates next customer code
+     * 
+     * @return Next customer code (e.g., CUST004)
+     * @throws SQLException if error occurs
+     */
+    public String generateCustomerCode() throws SQLException {
+<span class="nc" id="L277">        String sql = &quot;SELECT customer_code FROM customers ORDER BY customer_id DESC LIMIT 1&quot;;</span>
+        
+<span class="nc" id="L279">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L280">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L282">            ResultSet rs = stmt.executeQuery();</span>
+<span class="nc bnc" id="L283" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L284">                String lastCode = rs.getString(&quot;customer_code&quot;);</span>
+<span class="nc" id="L285">                int number = Integer.parseInt(lastCode.substring(4));</span>
+<span class="nc" id="L286">                return String.format(&quot;CUST%03d&quot;, number + 1);</span>
+            }
+            
+<span class="nc" id="L289">            return &quot;CUST001&quot;;</span>
+<span class="nc bnc" id="L290" title="All 4 branches missed.">        }</span>
+    }
+    
+    /**
+     * Maps ResultSet to Customer entity
+     * 
+     * @param rs ResultSet
+     * @return Customer entity
+     * @throws SQLException if error occurs
+     */
+    private Customer mapResultSetToCustomer(ResultSet rs) throws SQLException {
+<span class="nc" id="L301">        Customer customer = new Customer();</span>
+<span class="nc" id="L302">        customer.setCustomerId(rs.getInt(&quot;customer_id&quot;));</span>
+<span class="nc" id="L303">        customer.setUserId(rs.getInt(&quot;user_id&quot;));</span>
+<span class="nc" id="L304">        customer.setCustomerCode(rs.getString(&quot;customer_code&quot;));</span>
+<span class="nc" id="L305">        customer.setFirstName(rs.getString(&quot;first_name&quot;));</span>
+<span class="nc" id="L306">        customer.setLastName(rs.getString(&quot;last_name&quot;));</span>
+<span class="nc" id="L307">        customer.setPersonalKeyHash(rs.getString(&quot;personal_key_hash&quot;));</span>
+<span class="nc" id="L308">        customer.setPhone(rs.getString(&quot;phone&quot;));</span>
+<span class="nc" id="L309">        customer.setAddress(rs.getString(&quot;address&quot;));</span>
+        
+<span class="nc" id="L311">        Date dob = rs.getDate(&quot;date_of_birth&quot;);</span>
+<span class="nc bnc" id="L312" title="All 2 branches missed.">        if (dob != null) {</span>
+<span class="nc" id="L313">            customer.setDateOfBirth(dob.toLocalDate());</span>
+        }
+        
+<span class="nc" id="L316">        customer.setIdentificationNumber(rs.getString(&quot;identification_number&quot;));</span>
+<span class="nc" id="L317">        customer.setVerified(rs.getBoolean(&quot;is_verified&quot;));</span>
+<span class="nc" id="L318">        customer.setCreatedAt(rs.getTimestamp(&quot;created_at&quot;).toLocalDateTime());</span>
+<span class="nc" id="L319">        customer.setUpdatedAt(rs.getTimestamp(&quot;updated_at&quot;).toLocalDateTime());</span>
+        
+<span class="nc" id="L321">        return customer;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

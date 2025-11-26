@@ -1,0 +1,217 @@
+package com.banksim.config;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Properties;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
+/**
+ * Database configuration and connection pool management using HikariCP.
+ * Provides high-performance connection pooling for PostgreSQL database.
+ * 
+ * Thread-safe singleton implementation ensuring only one connection pool exists.
+ * 
+ * @author Jorge Pena - REM Consultancy
+ * @version 1.0
+ * @since 2024
+ */
+public class DatabaseConfig {
+    
+    private static DatabaseConfig instance;
+    private HikariDataSource dataSource;
+    private Properties properties;
+    
+    /**
+     * Private constructor to enforce singleton pattern
+     * Initializes HikariCP connection pool with configuration from application.properties
+     */
+    private DatabaseConfig() {
+        loadProperties();
+        initializeDataSource();
+    }
+    
+    /**
+     * Gets the singleton instance of DatabaseConfig
+     * Thread-safe lazy initialization
+     * 
+     * @return DatabaseConfig instance
+     */
+    public static synchronized DatabaseConfig getInstance() {
+        if (instance == null) {
+            instance = new DatabaseConfig();
+        }
+        return instance;
+    }
+    
+    /**
+     * Loads database configuration from application.properties file
+     * Falls back to default values if file not found
+     */
+    private void loadProperties() {
+        properties = new Properties();
+        
+        try {
+            // Try to load from resources
+            InputStream input = getClass().getClassLoader().getResourceAsStream("application.properties");
+            
+            // If not in resources, try file system
+            if (input == null) {
+                input = new FileInputStream("src/main/resources/application.properties");
+            }
+            
+            properties.load(input);
+            System.out.println("[DatabaseConfig] Properties loaded successfully");
+            
+        } catch (IOException e) {
+            System.err.println("[DatabaseConfig] Error loading properties: " + e.getMessage());
+            System.err.println("[DatabaseConfig] Using default configuration");
+            
+            // Set default properties
+            properties.setProperty("db.url", "jdbc:postgresql://localhost:5432/banksim");
+            properties.setProperty("db.username", "banksim_app");
+            properties.setProperty("db.password", "Change_This_Password_123!");
+            properties.setProperty("db.driver", "org.postgresql.Driver");
+            properties.setProperty("db.pool.maximumPoolSize", "10");
+            properties.setProperty("db.pool.minimumIdle", "2");
+            properties.setProperty("db.pool.connectionTimeout", "30000");
+            properties.setProperty("db.pool.idleTimeout", "600000");
+            properties.setProperty("db.pool.maxLifetime", "1800000");
+        }
+    }
+    
+    /**
+     * Initializes HikariCP data source with loaded configuration
+     * Configures connection pool settings for optimal performance
+     */
+    private void initializeDataSource() {
+        try {
+            HikariConfig config = new HikariConfig();
+            
+            // JDBC settings
+            config.setJdbcUrl(properties.getProperty("db.url"));
+            config.setUsername(properties.getProperty("db.username"));
+            config.setPassword(properties.getProperty("db.password"));
+            config.setDriverClassName(properties.getProperty("db.driver"));
+            
+            // Connection pool settings
+            config.setMaximumPoolSize(Integer.parseInt(properties.getProperty("db.pool.maximumPoolSize", "10")));
+            config.setMinimumIdle(Integer.parseInt(properties.getProperty("db.pool.minimumIdle", "2")));
+            config.setConnectionTimeout(Long.parseLong(properties.getProperty("db.pool.connectionTimeout", "30000")));
+            config.setIdleTimeout(Long.parseLong(properties.getProperty("db.pool.idleTimeout", "600000")));
+            config.setMaxLifetime(Long.parseLong(properties.getProperty("db.pool.maxLifetime", "1800000")));
+            
+            // Performance optimization
+            config.setAutoCommit(true);
+            config.setConnectionTestQuery("SELECT 1");
+            config.setPoolName("BankSimPool");
+            
+            // Leak detection (useful for debugging)
+            config.setLeakDetectionThreshold(60000); // 60 seconds
+            
+            dataSource = new HikariDataSource(config);
+            
+            System.out.println("[DatabaseConfig] HikariCP pool initialized successfully");
+            System.out.println("[DatabaseConfig] Database URL: " + config.getJdbcUrl());
+            System.out.println("[DatabaseConfig] Max pool size: " + config.getMaximumPoolSize());
+            
+        } catch (Exception e) {
+            System.err.println("[DatabaseConfig] Error initializing data source: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to initialize database connection pool", e);
+        }
+    }
+    
+    /**
+     * Gets a database connection from the pool
+     * Connection must be closed after use to return it to the pool
+     * 
+     * @return Database connection
+     * @throws SQLException if connection cannot be obtained
+     */
+    public Connection getConnection() throws SQLException {
+        if (dataSource == null) {
+            throw new SQLException("DataSource not initialized");
+        }
+        return dataSource.getConnection();
+    }
+    
+    /**
+     * Gets a configuration property value
+     * 
+     * @param key Property key
+     * @return Property value or null if not found
+     */
+    public String getProperty(String key) {
+        return properties.getProperty(key);
+    }
+    
+    /**
+     * Gets a configuration property value with default
+     * 
+     * @param key Property key
+     * @param defaultValue Default value if property not found
+     * @return Property value or default value
+     */
+    public String getProperty(String key, String defaultValue) {
+        return properties.getProperty(key, defaultValue);
+    }
+    
+    /**
+     * Gets pool statistics for monitoring
+     * 
+     * @return String containing pool statistics
+     */
+    public String getPoolStats() {
+        if (dataSource == null) {
+            return "DataSource not initialized";
+        }
+        
+        return String.format(
+            "Pool Stats: Active=%d, Idle=%d, Total=%d, Waiting=%d",
+            dataSource.getHikariPoolMXBean().getActiveConnections(),
+            dataSource.getHikariPoolMXBean().getIdleConnections(),
+            dataSource.getHikariPoolMXBean().getTotalConnections(),
+            dataSource.getHikariPoolMXBean().getThreadsAwaitingConnection()
+        );
+    }
+    
+    /**
+     * Tests database connectivity
+     * 
+     * @return true if connection successful, false otherwise
+     */
+    public boolean testConnection() {
+        try (Connection conn = getConnection()) {
+            return conn != null && !conn.isClosed();
+        } catch (SQLException e) {
+            System.err.println("[DatabaseConfig] Connection test failed: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Closes the data source and releases all connections
+     * Should be called on application shutdown
+     */
+    public void close() {
+        if (dataSource != null && !dataSource.isClosed()) {
+            dataSource.close();
+            System.out.println("[DatabaseConfig] Connection pool closed");
+        }
+    }
+    
+    /**
+     * Shutdown hook to ensure proper cleanup
+     */
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (instance != null) {
+                instance.close();
+            }
+        }));
+    }
+}

@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuditLog.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.banksim.model</a> &gt; <span class="el_source">AuditLog.java</span></div><h1>AuditLog.java</h1><pre class="source lang-java linenums">package com.banksim.model;
+
+import java.time.LocalDateTime;
+
+/**
+ * AuditLog entity for tracking security and compliance events.
+ * Records all significant actions performed by users in the system.
+ * 
+ * @author Jorge Pena - REM Consultancy
+ * @version 1.0
+ * @since 2024
+ */
+public class AuditLog {
+    
+    private Integer logId;
+    private Integer userId;
+    private String action;
+    private String entityType;
+    private Integer entityId;
+    private String oldValue;
+    private String newValue;
+    private String ipAddress;
+    private String userAgent;
+    private LocalDateTime createdAt;
+    
+    /**
+     * Default constructor
+     */
+<span class="nc" id="L29">    public AuditLog() {</span>
+<span class="nc" id="L30">        this.createdAt = LocalDateTime.now();</span>
+<span class="nc" id="L31">    }</span>
+    
+    /**
+     * Parameterized constructor for audit log creation
+     * 
+     * @param userId User who performed the action
+     * @param action Action performed
+     * @param entityType Type of entity affected
+     * @param entityId ID of the affected entity
+     */
+    public AuditLog(Integer userId, String action, String entityType, Integer entityId) {
+<span class="nc" id="L42">        this();</span>
+<span class="nc" id="L43">        this.userId = userId;</span>
+<span class="nc" id="L44">        this.action = action;</span>
+<span class="nc" id="L45">        this.entityType = entityType;</span>
+<span class="nc" id="L46">        this.entityId = entityId;</span>
+<span class="nc" id="L47">    }</span>
+    
+    // Getters and Setters
+    
+    /**
+     * Gets the log ID
+     * @return Log ID
+     */
+    public Integer getLogId() {
+<span class="nc" id="L56">        return logId;</span>
+    }
+    
+    /**
+     * Sets the log ID
+     * @param logId Log ID
+     */
+    public void setLogId(Integer logId) {
+<span class="nc" id="L64">        this.logId = logId;</span>
+<span class="nc" id="L65">    }</span>
+    
+    /**
+     * Gets the user ID
+     * @return User ID who performed the action
+     */
+    public Integer getUserId() {
+<span class="nc" id="L72">        return userId;</span>
+    }
+    
+    /**
+     * Sets the user ID
+     * @param userId User ID
+     */
+    public void setUserId(Integer userId) {
+<span class="nc" id="L80">        this.userId = userId;</span>
+<span class="nc" id="L81">    }</span>
+    
+    /**
+     * Gets the action performed
+     * @return Action name (e.g., &quot;LOGIN&quot;, &quot;CREATE_ACCOUNT&quot;, &quot;TRANSFER&quot;)
+     */
+    public String getAction() {
+<span class="nc" id="L88">        return action;</span>
+    }
+    
+    /**
+     * Sets the action performed
+     * @param action Action name
+     */
+    public void setAction(String action) {
+<span class="nc" id="L96">        this.action = action;</span>
+<span class="nc" id="L97">    }</span>
+    
+    /**
+     * Gets the entity type
+     * @return Entity type (e.g., &quot;USER&quot;, &quot;ACCOUNT&quot;, &quot;TRANSACTION&quot;)
+     */
+    public String getEntityType() {
+<span class="nc" id="L104">        return entityType;</span>
+    }
+    
+    /**
+     * Sets the entity type
+     * @param entityType Entity type
+     */
+    public void setEntityType(String entityType) {
+<span class="nc" id="L112">        this.entityType = entityType;</span>
+<span class="nc" id="L113">    }</span>
+    
+    /**
+     * Gets the entity ID
+     * @return Entity ID
+     */
+    public Integer getEntityId() {
+<span class="nc" id="L120">        return entityId;</span>
+    }
+    
+    /**
+     * Sets the entity ID
+     * @param entityId Entity ID
+     */
+    public void setEntityId(Integer entityId) {
+<span class="nc" id="L128">        this.entityId = entityId;</span>
+<span class="nc" id="L129">    }</span>
+    
+    /**
+     * Gets the old value (before change)
+     * @return Old value as JSON string
+     */
+    public String getOldValue() {
+<span class="nc" id="L136">        return oldValue;</span>
+    }
+    
+    /**
+     * Sets the old value
+     * @param oldValue Old value as JSON string
+     */
+    public void setOldValue(String oldValue) {
+<span class="nc" id="L144">        this.oldValue = oldValue;</span>
+<span class="nc" id="L145">    }</span>
+    
+    /**
+     * Gets the new value (after change)
+     * @return New value as JSON string
+     */
+    public String getNewValue() {
+<span class="nc" id="L152">        return newValue;</span>
+    }
+    
+    /**
+     * Sets the new value
+     * @param newValue New value as JSON string
+     */
+    public void setNewValue(String newValue) {
+<span class="nc" id="L160">        this.newValue = newValue;</span>
+<span class="nc" id="L161">    }</span>
+    
+    /**
+     * Gets the IP address
+     * @return Client IP address
+     */
+    public String getIpAddress() {
+<span class="nc" id="L168">        return ipAddress;</span>
+    }
+    
+    /**
+     * Sets the IP address
+     * @param ipAddress Client IP address
+     */
+    public void setIpAddress(String ipAddress) {
+<span class="nc" id="L176">        this.ipAddress = ipAddress;</span>
+<span class="nc" id="L177">    }</span>
+    
+    /**
+     * Gets the user agent
+     * @return Browser/client user agent string
+     */
+    public String getUserAgent() {
+<span class="nc" id="L184">        return userAgent;</span>
+    }
+    
+    /**
+     * Sets the user agent
+     * @param userAgent Browser/client user agent string
+     */
+    public void setUserAgent(String userAgent) {
+<span class="nc" id="L192">        this.userAgent = userAgent;</span>
+<span class="nc" id="L193">    }</span>
+    
+    /**
+     * Gets the creation timestamp
+     * @return Created date/time
+     */
+    public LocalDateTime getCreatedAt() {
+<span class="nc" id="L200">        return createdAt;</span>
+    }
+    
+    /**
+     * Sets the creation timestamp
+     * @param createdAt Created date/time
+     */
+    public void setCreatedAt(LocalDateTime createdAt) {
+<span class="nc" id="L208">        this.createdAt = createdAt;</span>
+<span class="nc" id="L209">    }</span>
+    
+    @Override
+    public String toString() {
+<span class="nc" id="L213">        return &quot;AuditLog{&quot; +</span>
+                &quot;logId=&quot; + logId +
+                &quot;, userId=&quot; + userId +
+                &quot;, action='&quot; + action + '\'' +
+                &quot;, entityType='&quot; + entityType + '\'' +
+                &quot;, entityId=&quot; + entityId +
+                &quot;, ipAddress='&quot; + ipAddress + '\'' +
+                &quot;, createdAt=&quot; + createdAt +
+                '}';
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

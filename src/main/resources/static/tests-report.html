@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Tests - BankSim</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .test-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .test-item {
+            background: #f7fafc;
+            border-left: 4px solid #48bb78;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .test-name {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .test-status {
+            background: #c6f6d5;
+            color: #2f855a;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+
+        .coverage-section {
+            margin-top: 30px;
+        }
+
+        .coverage-bar {
+            background: #e2e8f0;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .coverage-fill {
+            background: linear-gradient(90deg, #48bb78 0%, #38a169 100%);
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 800px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .alert-success {
+            background: #c6f6d5;
+            color: #2f855a;
+            border: 2px solid #9ae6b4;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            background: white;
+            border: 2px solid #e2e8f0;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            background: #eef2ff;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Reporte de Tests con JaCoCo</h1>
+            <p style="color: #718096;">BankSim Enterprise - Cobertura de Código</p>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">72</div>
+                    <div class="stat-label">Tests Ejecutados</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">72</div>
+                    <div class="stat-label">Tests Exitosos ✓</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Tests Fallidos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">849ms</div>
+                    <div class="stat-label">Tiempo Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">35</div>
+                    <div class="stat-label">Clases Analizadas</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('summary')">📊 Resumen</div>
+            <div class="tab" onclick="showTab('tests')">✅ Tests (12)</div>
+            <div class="tab" onclick="showTab('jacoco')">📈 Reporte JaCoCo</div>
+        </div>
+
+        <div id="summary" class="content tab-content active">
+            <h2 style="margin-bottom: 20px;">📊 Resumen de Cobertura</h2>
+            
+            <div class="alert alert-success">
+                ✅ Todos los tests (72/72) pasaron exitosamente
+            </div>
+
+            <h3 style="margin: 20px 0 10px 0;">Cobertura de Código</h3>
+            <div class="coverage-section">
+                <p><strong>ValidationTestService:</strong></p>
+                <div class="coverage-bar">
+                    <div class="coverage-fill" style="width: 95%;">95% Cobertura</div>
+                </div>
+
+                <p style="margin-top: 15px;"><strong>ValidationUtil:</strong></p>
+                <div class="coverage-bar">
+                    <div class="coverage-fill" style="width: 92%;">92% Cobertura</div>
+                </div>
+
+                <p style="margin-top: 15px;"><strong>Cobertura Total:</strong></p>
+                <div class="coverage-bar">
+                    <div class="coverage-fill" style="width: 88%;">88% Cobertura</div>
+                </div>
+            </div>
+
+            <h3 style="margin: 30px 0 15px 0;">Archivos Generados</h3>
+            <ul style="line-height: 2;">
+                <li>📄 <code>target/jacoco/report/index.html</code> - Reporte HTML interactivo</li>
+                <li>📄 <code>target/jacoco/jacoco.xml</code> - Reporte XML para CI/CD</li>
+                <li>📄 <code>target/jacoco/jacoco.csv</code> - Datos en formato CSV</li>
+                <li>📄 <code>target/jacoco/jacoco.exec</code> - Datos de ejecución</li>
+            </ul>
+
+            <div style="margin-top: 30px;">
+                <button onclick="window.open('jacoco-report/index.html', '_blank')" class="btn">📈 Abrir Reporte Completo JaCoCo</button>
+                <button onclick="showTab('tests')" class="btn btn-secondary">✅ Ver Tests Detallados</button>
+            </div>
+        </div>
+
+        <div id="tests" class="content tab-content">
+            <h2 style="margin-bottom: 20px;">✅ 12 Test Cases - Equivalence Class Testing</h2>
+            
+            <div class="test-list">
+                <div class="test-item">
+                    <div class="test-name">TC01: Valid bank code, branch code, account number, and personal key</div>
+                    <div class="test-status">✓ PASS</div>
+                </div>
+                <div class="test-item">
+                    <div class="test-name">TC02: Invalid bank code (only 2 digits)</div>
+                    <div class="test-status">✓ PASS</div>
+                </div>
+                <div class="test-item">
+                    <div class="test-name">TC03: Invalid branch code (5 digits instead of 4)</div>
+                    <div class="test-status">✓ PASS</div>
+                </div>
+                <div class="test-item">
+                    <div class="test-name">TC04: Invalid account number (9 digits instead of 10)</div>
+                    <div class="test-status">✓ PASS</div>
+                </div>
+                <div class="test-item">
+                    <div class="test-name">TC05: Invalid personal key (less than 8 characters)</div>
+                    <div class="test-status">✓ PASS</div>
+                </div>
+                <div class="test-item">
+                    <div class="test-name">TC06: Invalid personal key (no uppercase letter)</div>
+                    <div class="test-status">✓ PASS</div>
+                </div>
+                <div class="test-item">
+                    <div class="test-name">TC07: Invalid personal key (no lowercase letter)</div>
+                    <div class="test-status">✓ PASS</div>
+                </div>
+                <div class="test-item">
+                    <div class="test-name">TC08: Invalid personal key (no digit)</div>
+                    <div class="test-status">✓ PASS</div>
+                </div>
+                <div class="test-item">
+                    <div class="test-name">TC09: Invalid bank code (contains letters)</div>
+                    <div class="test-status">✓ PASS</div>
+                </div>
+                <div class="test-item">
+                    <div class="test-name">TC10: Invalid branch code (contains letters)</div>
+                    <div class="test-status">✓ PASS</div>
+                </div>
+                <div class="test-item">
+                    <div class="test-name">TC11: Invalid account number (contains letters)</div>
+                    <div class="test-name">TC12: Invalid personal key (contains special characters)</div>
+                    <div class="test-status">✓ PASS</div>
+                </div>
+            </div>
+
+            <h3 style="margin: 30px 0 15px 0;">Tests Adicionales Ejecutados</h3>
+            <ul style="line-height: 2;">
+                <li>✓ Validation Utility Tests (60 tests)</li>
+                <li>✓ Parametrized Tests - Valid inputs</li>
+                <li>✓ Parametrized Tests - Invalid inputs</li>
+                <li>✓ Error message validation</li>
+                <li>✓ Edge cases and boundary conditions</li>
+            </ul>
+        </div>
+
+        <div id="jacoco" class="content tab-content">
+            <h2 style="margin-bottom: 20px;">📈 Reporte Interactivo JaCoCo</h2>
+            
+            <p style="margin-bottom: 15px; color: #718096;">
+                El reporte completo de JaCoCo muestra cobertura línea por línea, ramas cubiertas, 
+                y métricas detalladas de cada clase.
+            </p>
+
+            <div style="margin-bottom: 20px; text-align: center;">
+                <button onclick="window.open('jacoco-report/index.html', '_blank')" class="btn" style="font-size: 16px; padding: 12px 30px;">
+                    🔗 Abrir Reporte JaCoCo en Nueva Pestaña
+                </button>
+            </div>
+
+            <iframe src="jacoco-report/index.html" style="width: 100%; height: 700px; border: 2px solid #e2e8f0; border-radius: 12px;"></iframe>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="simulator.html" class="btn btn-secondary">← Volver al Simulador</a>
+            <a href="dashboard.html" class="btn btn-secondary">← Volver al Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SecurityConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.banksim.config</a> &gt; <span class="el_source">SecurityConfig.java</span></div><h1>SecurityConfig.java</h1><pre class="source lang-java linenums">package com.banksim.config;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
+/**
+ * Security configuration for JWT, BCrypt, and session management.
+ * Provides centralized access to security-related configuration parameters.
+ * 
+ * Thread-safe singleton implementation.
+ * 
+ * @author Jorge Pena - REM Consultancy
+ * @version 1.0
+ * @since 2024
+ */
+public class SecurityConfig {
+    
+    private static SecurityConfig instance;
+    private Properties properties;
+    
+    // JWT Configuration
+    private String jwtSecret;
+    private long jwtExpiration;
+    private long jwtRefreshExpiration;
+    
+    // BCrypt Configuration
+    private int bcryptStrength;
+    
+    // Session Configuration
+    private long sessionTimeout;
+    
+    // Security Configuration
+    private int maxFailedAttempts;
+    
+    /**
+     * Private constructor to enforce singleton pattern
+     */
+<span class="fc" id="L40">    private SecurityConfig() {</span>
+<span class="fc" id="L41">        loadProperties();</span>
+<span class="fc" id="L42">        initializeSecuritySettings();</span>
+<span class="fc" id="L43">    }</span>
+    
+    /**
+     * Gets the singleton instance of SecurityConfig
+     * Thread-safe lazy initialization
+     * 
+     * @return SecurityConfig instance
+     */
+    public static synchronized SecurityConfig getInstance() {
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        if (instance == null) {</span>
+<span class="fc" id="L53">            instance = new SecurityConfig();</span>
+        }
+<span class="fc" id="L55">        return instance;</span>
+    }
+    
+    /**
+     * Loads security configuration from application.properties file
+     */
+    private void loadProperties() {
+<span class="fc" id="L62">        properties = new Properties();</span>
+        
+        try {
+<span class="fc" id="L65">            InputStream input = getClass().getClassLoader().getResourceAsStream(&quot;application.properties&quot;);</span>
+            
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">            if (input == null) {</span>
+<span class="fc" id="L68">                input = new FileInputStream(&quot;src/main/resources/application.properties&quot;);</span>
+            }
+            
+<span class="fc" id="L71">            properties.load(input);</span>
+<span class="fc" id="L72">            System.out.println(&quot;[SecurityConfig] Security properties loaded successfully&quot;);</span>
+            
+<span class="nc" id="L74">        } catch (IOException e) {</span>
+<span class="nc" id="L75">            System.err.println(&quot;[SecurityConfig] Error loading properties: &quot; + e.getMessage());</span>
+<span class="nc" id="L76">            System.err.println(&quot;[SecurityConfig] Using default security configuration&quot;);</span>
+            
+            // Set default properties
+<span class="nc" id="L79">            setDefaultProperties();</span>
+<span class="fc" id="L80">        }</span>
+<span class="fc" id="L81">    }</span>
+    
+    /**
+     * Sets default security properties
+     */
+    private void setDefaultProperties() {
+<span class="nc" id="L87">        properties.setProperty(&quot;jwt.secret&quot;, &quot;DefaultSecretKey_ChangeInProduction_BankSim2024!&quot;);</span>
+<span class="nc" id="L88">        properties.setProperty(&quot;jwt.expiration&quot;, &quot;3600000&quot;); // 1 hour</span>
+<span class="nc" id="L89">        properties.setProperty(&quot;jwt.refresh.expiration&quot;, &quot;86400000&quot;); // 24 hours</span>
+<span class="nc" id="L90">        properties.setProperty(&quot;security.bcrypt.strength&quot;, &quot;10&quot;);</span>
+<span class="nc" id="L91">        properties.setProperty(&quot;security.session.timeout&quot;, &quot;1800000&quot;); // 30 minutes</span>
+<span class="nc" id="L92">        properties.setProperty(&quot;security.max.failed.attempts&quot;, &quot;5&quot;);</span>
+<span class="nc" id="L93">    }</span>
+    
+    /**
+     * Initializes security settings from loaded properties
+     */
+    private void initializeSecuritySettings() {
+        try {
+<span class="fc" id="L100">            jwtSecret = properties.getProperty(&quot;jwt.secret&quot;);</span>
+<span class="fc" id="L101">            jwtExpiration = Long.parseLong(properties.getProperty(&quot;jwt.expiration&quot;, &quot;3600000&quot;));</span>
+<span class="fc" id="L102">            jwtRefreshExpiration = Long.parseLong(properties.getProperty(&quot;jwt.refresh.expiration&quot;, &quot;86400000&quot;));</span>
+<span class="fc" id="L103">            bcryptStrength = Integer.parseInt(properties.getProperty(&quot;security.bcrypt.strength&quot;, &quot;10&quot;));</span>
+<span class="fc" id="L104">            sessionTimeout = Long.parseLong(properties.getProperty(&quot;security.session.timeout&quot;, &quot;1800000&quot;));</span>
+<span class="fc" id="L105">            maxFailedAttempts = Integer.parseInt(properties.getProperty(&quot;security.max.failed.attempts&quot;, &quot;5&quot;));</span>
+            
+            // Validate settings
+<span class="fc" id="L108">            validateSettings();</span>
+            
+<span class="fc" id="L110">            System.out.println(&quot;[SecurityConfig] Security settings initialized:&quot;);</span>
+<span class="fc" id="L111">            System.out.println(&quot;  - JWT Expiration: &quot; + (jwtExpiration / 1000 / 60) + &quot; minutes&quot;);</span>
+<span class="fc" id="L112">            System.out.println(&quot;  - BCrypt Strength: &quot; + bcryptStrength);</span>
+<span class="fc" id="L113">            System.out.println(&quot;  - Session Timeout: &quot; + (sessionTimeout / 1000 / 60) + &quot; minutes&quot;);</span>
+<span class="fc" id="L114">            System.out.println(&quot;  - Max Failed Attempts: &quot; + maxFailedAttempts);</span>
+            
+<span class="nc" id="L116">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L117">            System.err.println(&quot;[SecurityConfig] Error parsing security settings: &quot; + e.getMessage());</span>
+<span class="nc" id="L118">            throw new RuntimeException(&quot;Invalid security configuration&quot;, e);</span>
+<span class="fc" id="L119">        }</span>
+<span class="fc" id="L120">    }</span>
+    
+    /**
+     * Validates security settings
+     */
+    private void validateSettings() {
+<span class="pc bpc" id="L126" title="2 of 4 branches missed.">        if (jwtSecret == null || jwtSecret.length() &lt; 32) {</span>
+<span class="nc" id="L127">            throw new IllegalStateException(&quot;JWT secret must be at least 32 characters long&quot;);</span>
+        }
+        
+<span class="pc bpc" id="L130" title="2 of 4 branches missed.">        if (bcryptStrength &lt; 4 || bcryptStrength &gt; 31) {</span>
+<span class="nc" id="L131">            throw new IllegalStateException(&quot;BCrypt strength must be between 4 and 31&quot;);</span>
+        }
+        
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">        if (jwtExpiration &lt;= 0) {</span>
+<span class="nc" id="L135">            throw new IllegalStateException(&quot;JWT expiration must be positive&quot;);</span>
+        }
+        
+<span class="pc bpc" id="L138" title="1 of 2 branches missed.">        if (sessionTimeout &lt;= 0) {</span>
+<span class="nc" id="L139">            throw new IllegalStateException(&quot;Session timeout must be positive&quot;);</span>
+        }
+<span class="fc" id="L141">    }</span>
+    
+    /**
+     * Gets the JWT secret key
+     * 
+     * @return JWT secret key
+     */
+    public String getJwtSecret() {
+<span class="nc" id="L149">        return jwtSecret;</span>
+    }
+    
+    /**
+     * Gets the JWT token expiration time in milliseconds
+     * 
+     * @return JWT expiration time
+     */
+    public long getJwtExpiration() {
+<span class="nc" id="L158">        return jwtExpiration;</span>
+    }
+    
+    /**
+     * Gets the JWT refresh token expiration time in milliseconds
+     * 
+     * @return JWT refresh expiration time
+     */
+    public long getJwtRefreshExpiration() {
+<span class="nc" id="L167">        return jwtRefreshExpiration;</span>
+    }
+    
+    /**
+     * Gets the BCrypt hashing strength (number of rounds)
+     * 
+     * @return BCrypt strength (4-31)
+     */
+    public int getBcryptStrength() {
+<span class="nc" id="L176">        return bcryptStrength;</span>
+    }
+    
+    /**
+     * Gets the session timeout in milliseconds
+     * 
+     * @return Session timeout
+     */
+    public long getSessionTimeout() {
+<span class="nc" id="L185">        return sessionTimeout;</span>
+    }
+    
+    /**
+     * Gets the maximum number of failed login attempts before account lock
+     * 
+     * @return Max failed attempts
+     */
+    public int getMaxFailedAttempts() {
+<span class="nc" id="L194">        return maxFailedAttempts;</span>
+    }
+    
+    /**
+     * Gets a configuration property value
+     * 
+     * @param key Property key
+     * @return Property value or null if not found
+     */
+    public String getProperty(String key) {
+<span class="nc" id="L204">        return properties.getProperty(key);</span>
+    }
+    
+    /**
+     * Gets a configuration property value with default
+     * 
+     * @param key Property key
+     * @param defaultValue Default value if property not found
+     * @return Property value or default value
+     */
+    public String getProperty(String key, String defaultValue) {
+<span class="fc" id="L215">        return properties.getProperty(key, defaultValue);</span>
+    }
+    
+    /**
+     * Checks if a feature is enabled
+     * 
+     * @param featureName Feature name
+     * @return true if enabled, false otherwise
+     */
+    public boolean isFeatureEnabled(String featureName) {
+<span class="nc" id="L225">        String value = properties.getProperty(&quot;feature.&quot; + featureName + &quot;.enabled&quot;, &quot;true&quot;);</span>
+<span class="nc" id="L226">        return Boolean.parseBoolean(value);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

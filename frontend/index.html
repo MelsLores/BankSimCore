@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Bancario - Banco Nacional</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🏦 SISTEMA BANCARIO - BANCO NACIONAL</h1>
+            <p>Sprint 3: Testing de Aplicación Bancaria</p>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" onclick="showTab('dashboard')">📊 Dashboard</button>
+            <button class="tab-btn" onclick="showTab('customers')">👥 Clientes</button>
+            <button class="tab-btn" onclick="showTab('accounts')">💳 Cuentas</button>
+            <button class="tab-btn" onclick="showTab('operations')">💰 Operaciones</button>
+            <button class="tab-btn" onclick="showTab('services')">📋 Servicios</button>
+            <button class="tab-btn" onclick="showTab('tests')">🧪 Tests Automatizados</button>
+        </nav>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <h2>Resumen del Banco</h2>
+            <div class="summary-cards">
+                <div class="card">
+                    <h3>Total Clientes</h3>
+                    <p id="totalCustomers" class="big-number">0</p>
+                </div>
+                <div class="card">
+                    <h3>Total Cuentas</h3>
+                    <p id="totalAccounts" class="big-number">0</p>
+                </div>
+                <div class="card">
+                    <h3>Saldo Total</h3>
+                    <p id="totalBalance" class="big-number">$0.00</p>
+                </div>
+                <div class="card">
+                    <h3>Transacciones</h3>
+                    <p id="totalTransactions" class="big-number">0</p>
+                </div>
+            </div>
+            
+            <div class="account-list">
+                <h3>Cuentas Registradas</h3>
+                <table id="accountsTable">
+                    <thead>
+                        <tr>
+                            <th>Número de Cuenta</th>
+                            <th>Titular</th>
+                            <th>Saldo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accountsTableBody">
+                        <tr><td colspan="3">Cargando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Customers Tab -->
+        <div id="customers" class="tab-content">
+            <h2>Gestión de Clientes</h2>
+            <div class="form-container">
+                <h3>Crear Nuevo Cliente</h3>
+                <form id="customerForm" class="form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>ID del Cliente:</label>
+                            <input type="text" id="customerId" placeholder="CUST001" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Nombre:</label>
+                            <input type="text" id="firstName" placeholder="Juan" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Apellido:</label>
+                            <input type="text" id="lastName" placeholder="Pérez" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Clave Personal (mín 8 alfanuméricos):</label>
+                            <input type="password" id="personalKey" placeholder="Abcd1234" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Email:</label>
+                            <input type="email" id="email" placeholder="juan@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono:</label>
+                            <input type="tel" id="phone" placeholder="555-1234" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Crear Cliente</button>
+                </form>
+            </div>
+            
+            <div id="customersList" class="list-container">
+                <h3>Clientes Registrados</h3>
+                <div id="customersListContent">Cargando...</div>
+            </div>
+        </div>
+
+        <!-- Accounts Tab -->
+        <div id="accounts" class="tab-content">
+            <h2>Gestión de Cuentas</h2>
+            <div class="form-container">
+                <h3>Crear Nueva Cuenta</h3>
+                <form id="accountForm" class="form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Código de Banco (3 dígitos):</label>
+                            <input type="text" id="bankCode" placeholder="123" maxlength="3" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Código de Sucursal (4 dígitos):</label>
+                            <input type="text" id="branchCode" placeholder="4567" maxlength="4" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Número de Cuenta (10 dígitos):</label>
+                            <input type="text" id="accountNumber" placeholder="1234567890" maxlength="10" required>
+                        </div>
+                        <div class="form-group">
+                            <label>ID del Cliente:</label>
+                            <input type="text" id="accountCustomerId" placeholder="CUST001" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Saldo Inicial:</label>
+                        <input type="number" id="initialBalance" placeholder="1000.00" step="0.01" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Crear Cuenta</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Operations Tab -->
+        <div id="operations" class="tab-content">
+            <h2>Operaciones Bancarias</h2>
+            
+            <div class="operations-grid">
+                <!-- Deposit -->
+                <div class="operation-card">
+                    <h3>💵 Depósito</h3>
+                    <form id="depositForm" class="form">
+                        <div class="form-group">
+                            <label>Número de Cuenta:</label>
+                            <input type="text" id="depositAccount" placeholder="123-4567-1234567890" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Monto:</label>
+                            <input type="number" id="depositAmount" placeholder="100.00" step="0.01" required>
+                        </div>
+                        <button type="submit" class="btn btn-success">Depositar</button>
+                    </form>
+                </div>
+
+                <!-- Withdraw -->
+                <div class="operation-card">
+                    <h3>💸 Retiro</h3>
+                    <form id="withdrawForm" class="form">
+                        <div class="form-group">
+                            <label>Número de Cuenta:</label>
+                            <input type="text" id="withdrawAccount" placeholder="123-4567-1234567890" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Monto:</label>
+                            <input type="number" id="withdrawAmount" placeholder="100.00" step="0.01" required>
+                        </div>
+                        <button type="submit" class="btn btn-warning">Retirar</button>
+                    </form>
+                </div>
+
+                <!-- Transfer -->
+                <div class="operation-card">
+                    <h3>🔄 Transferencia</h3>
+                    <form id="transferForm" class="form">
+                        <div class="form-group">
+                            <label>Cuenta Origen:</label>
+                            <input type="text" id="transferFrom" placeholder="123-4567-1234567890" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Cuenta Destino:</label>
+                            <input type="text" id="transferTo" placeholder="456-7890-5678901234" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Monto:</label>
+                            <input type="number" id="transferAmount" placeholder="100.00" step="0.01" required>
+                        </div>
+                        <button type="submit" class="btn btn-info">Transferir</button>
+                    </form>
+                </div>
+
+                <!-- Balance Query -->
+                <div class="operation-card">
+                    <h3>🔍 Consultar Saldo</h3>
+                    <form id="balanceForm" class="form">
+                        <div class="form-group">
+                            <label>Número de Cuenta:</label>
+                            <input type="text" id="balanceAccount" placeholder="123-4567-1234567890" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Consultar</button>
+                    </form>
+                    <div id="balanceResult" class="result-box"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Services Tab -->
+        <div id="services" class="tab-content">
+            <h2>Solicitudes de Servicios</h2>
+            
+            <div class="services-grid">
+                <!-- Checkbook Request -->
+                <div class="service-card">
+                    <h3>📒 Solicitar Chequera</h3>
+                    <form id="checkbookForm" class="form">
+                        <div class="form-group">
+                            <label>Número de Cuenta:</label>
+                            <input type="text" id="checkbookAccount" placeholder="123-4567-1234567890" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Clave Personal:</label>
+                            <input type="password" id="checkbookKey" placeholder="Abcd1234" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Solicitar</button>
+                    </form>
+                </div>
+
+                <!-- Statement Request -->
+                <div class="service-card">
+                    <h3>📄 Estado de Cuenta</h3>
+                    <form id="statementForm" class="form">
+                        <div class="form-group">
+                            <label>Número de Cuenta:</label>
+                            <input type="text" id="statementAccount" placeholder="123-4567-1234567890" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Clave Personal:</label>
+                            <input type="password" id="statementKey" placeholder="Abcd1234" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Generar</button>
+                    </form>
+                    <div id="statementResult" class="result-box"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tests Tab -->
+        <div id="tests" class="tab-content">
+            <h2>Tests Automatizados (12 casos del PDF)</h2>
+            <p>Validación de equivalencia de clases según especificaciones del Sprint 3</p>
+            
+            <button onclick="runTests()" class="btn btn-primary btn-large">▶️ Ejecutar Todos los Tests</button>
+            
+            <div id="testsResults" class="tests-container">
+                <p>Presione el botón para ejecutar los 12 casos de prueba automatizados.</p>
+            </div>
+            
+            <div id="testsSummary" class="summary-box"></div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

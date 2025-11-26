@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Account.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.banksim.model</a> &gt; <span class="el_source">Account.java</span></div><h1>Account.java</h1><pre class="source lang-java linenums">package com.banksim.model;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+/**
+ * Account entity representing bank accounts.
+ * Each account belongs to a customer and can have multiple transactions.
+ * Supports different account types: SAVINGS, CHECKING, BUSINESS.
+ * 
+ * @author Jorge Pena - REM Consultancy
+ * @version 1.0
+ * @since 2024
+ */
+public class Account {
+    
+    /**
+     * Account type enumeration
+     */
+<span class="nc" id="L20">    public enum AccountType {</span>
+<span class="nc" id="L21">        SAVINGS,</span>
+<span class="nc" id="L22">        CHECKING,</span>
+<span class="nc" id="L23">        BUSINESS</span>
+    }
+    
+    /**
+     * Account status enumeration
+     */
+<span class="nc" id="L29">    public enum AccountStatus {</span>
+<span class="nc" id="L30">        ACTIVE,</span>
+<span class="nc" id="L31">        SUSPENDED,</span>
+<span class="nc" id="L32">        CLOSED</span>
+    }
+    
+    private Integer accountId;
+    private Integer customerId;
+    private String accountNumber;
+    private String bankCode;
+    private String branchCode;
+    private AccountType accountType;
+    private BigDecimal balance;
+    private String currency;
+    private AccountStatus status;
+    private BigDecimal interestRate;
+    private BigDecimal overdraftLimit;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    
+    /**
+     * Default constructor
+     */
+<span class="nc" id="L52">    public Account() {</span>
+<span class="nc" id="L53">        this.balance = BigDecimal.ZERO;</span>
+<span class="nc" id="L54">        this.currency = &quot;USD&quot;;</span>
+<span class="nc" id="L55">        this.status = AccountStatus.ACTIVE;</span>
+<span class="nc" id="L56">        this.accountType = AccountType.SAVINGS;</span>
+<span class="nc" id="L57">        this.interestRate = BigDecimal.ZERO;</span>
+<span class="nc" id="L58">        this.overdraftLimit = BigDecimal.ZERO;</span>
+<span class="nc" id="L59">        this.createdAt = LocalDateTime.now();</span>
+<span class="nc" id="L60">        this.updatedAt = LocalDateTime.now();</span>
+<span class="nc" id="L61">    }</span>
+    
+    /**
+     * Parameterized constructor for account creation
+     * 
+     * @param customerId Customer ID who owns this account
+     * @param accountNumber Full account number (XXX-XXXX-XXXXXXXXXX)
+     * @param bankCode Bank code (3 digits)
+     * @param branchCode Branch code (4 digits)
+     * @param accountType Type of account
+     */
+    public Account(Integer customerId, String accountNumber, String bankCode, String branchCode, AccountType accountType) {
+<span class="nc" id="L73">        this();</span>
+<span class="nc" id="L74">        this.customerId = customerId;</span>
+<span class="nc" id="L75">        this.accountNumber = accountNumber;</span>
+<span class="nc" id="L76">        this.bankCode = bankCode;</span>
+<span class="nc" id="L77">        this.branchCode = branchCode;</span>
+<span class="nc" id="L78">        this.accountType = accountType;</span>
+<span class="nc" id="L79">    }</span>
+    
+    // Getters and Setters
+    
+    /**
+     * Gets the account ID
+     * @return Account ID
+     */
+    public Integer getAccountId() {
+<span class="nc" id="L88">        return accountId;</span>
+    }
+    
+    /**
+     * Sets the account ID
+     * @param accountId Account ID
+     */
+    public void setAccountId(Integer accountId) {
+<span class="nc" id="L96">        this.accountId = accountId;</span>
+<span class="nc" id="L97">    }</span>
+    
+    /**
+     * Gets the customer ID
+     * @return Customer ID
+     */
+    public Integer getCustomerId() {
+<span class="nc" id="L104">        return customerId;</span>
+    }
+    
+    /**
+     * Sets the customer ID
+     * @param customerId Customer ID
+     */
+    public void setCustomerId(Integer customerId) {
+<span class="nc" id="L112">        this.customerId = customerId;</span>
+<span class="nc" id="L113">    }</span>
+    
+    /**
+     * Gets the account number
+     * @return Full account number (XXX-XXXX-XXXXXXXXXX)
+     */
+    public String getAccountNumber() {
+<span class="nc" id="L120">        return accountNumber;</span>
+    }
+    
+    /**
+     * Sets the account number
+     * @param accountNumber Full account number
+     */
+    public void setAccountNumber(String accountNumber) {
+<span class="nc" id="L128">        this.accountNumber = accountNumber;</span>
+<span class="nc" id="L129">    }</span>
+    
+    /**
+     * Gets the bank code
+     * @return Bank code (3 digits)
+     */
+    public String getBankCode() {
+<span class="nc" id="L136">        return bankCode;</span>
+    }
+    
+    /**
+     * Sets the bank code
+     * @param bankCode Bank code (3 digits)
+     */
+    public void setBankCode(String bankCode) {
+<span class="nc" id="L144">        this.bankCode = bankCode;</span>
+<span class="nc" id="L145">    }</span>
+    
+    /**
+     * Gets the branch code
+     * @return Branch code (4 digits)
+     */
+    public String getBranchCode() {
+<span class="nc" id="L152">        return branchCode;</span>
+    }
+    
+    /**
+     * Sets the branch code
+     * @param branchCode Branch code (4 digits)
+     */
+    public void setBranchCode(String branchCode) {
+<span class="nc" id="L160">        this.branchCode = branchCode;</span>
+<span class="nc" id="L161">    }</span>
+    
+    /**
+     * Gets the account type
+     * @return Account type (SAVINGS, CHECKING, BUSINESS)
+     */
+    public AccountType getAccountType() {
+<span class="nc" id="L168">        return accountType;</span>
+    }
+    
+    /**
+     * Sets the account type
+     * @param accountType Account type
+     */
+    public void setAccountType(AccountType accountType) {
+<span class="nc" id="L176">        this.accountType = accountType;</span>
+<span class="nc" id="L177">    }</span>
+    
+    /**
+     * Gets the current balance
+     * @return Account balance
+     */
+    public BigDecimal getBalance() {
+<span class="nc" id="L184">        return balance;</span>
+    }
+    
+    /**
+     * Sets the account balance
+     * @param balance New balance
+     */
+    public void setBalance(BigDecimal balance) {
+<span class="nc" id="L192">        this.balance = balance;</span>
+<span class="nc" id="L193">    }</span>
+    
+    /**
+     * Gets the currency code
+     * @return Currency code (e.g., USD, EUR)
+     */
+    public String getCurrency() {
+<span class="nc" id="L200">        return currency;</span>
+    }
+    
+    /**
+     * Sets the currency code
+     * @param currency Currency code
+     */
+    public void setCurrency(String currency) {
+<span class="nc" id="L208">        this.currency = currency;</span>
+<span class="nc" id="L209">    }</span>
+    
+    /**
+     * Gets the account status
+     * @return Account status (ACTIVE, SUSPENDED, CLOSED)
+     */
+    public AccountStatus getStatus() {
+<span class="nc" id="L216">        return status;</span>
+    }
+    
+    /**
+     * Sets the account status
+     * @param status Account status
+     */
+    public void setStatus(AccountStatus status) {
+<span class="nc" id="L224">        this.status = status;</span>
+<span class="nc" id="L225">    }</span>
+    
+    /**
+     * Gets the interest rate
+     * @return Interest rate percentage
+     */
+    public BigDecimal getInterestRate() {
+<span class="nc" id="L232">        return interestRate;</span>
+    }
+    
+    /**
+     * Sets the interest rate
+     * @param interestRate Interest rate percentage
+     */
+    public void setInterestRate(BigDecimal interestRate) {
+<span class="nc" id="L240">        this.interestRate = interestRate;</span>
+<span class="nc" id="L241">    }</span>
+    
+    /**
+     * Gets the overdraft limit
+     * @return Overdraft limit amount
+     */
+    public BigDecimal getOverdraftLimit() {
+<span class="nc" id="L248">        return overdraftLimit;</span>
+    }
+    
+    /**
+     * Sets the overdraft limit
+     * @param overdraftLimit Overdraft limit amount
+     */
+    public void setOverdraftLimit(BigDecimal overdraftLimit) {
+<span class="nc" id="L256">        this.overdraftLimit = overdraftLimit;</span>
+<span class="nc" id="L257">    }</span>
+    
+    /**
+     * Gets creation timestamp
+     * @return Created date/time
+     */
+    public LocalDateTime getCreatedAt() {
+<span class="nc" id="L264">        return createdAt;</span>
+    }
+    
+    /**
+     * Sets creation timestamp
+     * @param createdAt Created date/time
+     */
+    public void setCreatedAt(LocalDateTime createdAt) {
+<span class="nc" id="L272">        this.createdAt = createdAt;</span>
+<span class="nc" id="L273">    }</span>
+    
+    /**
+     * Gets last update timestamp
+     * @return Updated date/time
+     */
+    public LocalDateTime getUpdatedAt() {
+<span class="nc" id="L280">        return updatedAt;</span>
+    }
+    
+    /**
+     * Sets last update timestamp
+     * @param updatedAt Updated date/time
+     */
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+<span class="nc" id="L288">        this.updatedAt = updatedAt;</span>
+<span class="nc" id="L289">    }</span>
+    
+    // Business methods
+    
+    /**
+     * Checks if account is active
+     * @return true if active, false otherwise
+     */
+    public boolean isActive() {
+<span class="nc bnc" id="L298" title="All 2 branches missed.">        return this.status == AccountStatus.ACTIVE;</span>
+    }
+    
+    /**
+     * Checks if account has sufficient balance for withdrawal
+     * @param amount Amount to check
+     * @return true if sufficient funds, false otherwise
+     */
+    public boolean hasSufficientBalance(BigDecimal amount) {
+<span class="nc" id="L307">        BigDecimal minimumBalance = overdraftLimit.negate();</span>
+<span class="nc bnc" id="L308" title="All 2 branches missed.">        return balance.subtract(amount).compareTo(minimumBalance) &gt;= 0;</span>
+    }
+    
+    /**
+     * Deposits amount to account
+     * @param amount Amount to deposit
+     * @throws IllegalArgumentException if amount is negative or zero
+     */
+    public void deposit(BigDecimal amount) {
+<span class="nc bnc" id="L317" title="All 2 branches missed.">        if (amount.compareTo(BigDecimal.ZERO) &lt;= 0) {</span>
+<span class="nc" id="L318">            throw new IllegalArgumentException(&quot;Deposit amount must be positive&quot;);</span>
+        }
+<span class="nc" id="L320">        this.balance = this.balance.add(amount);</span>
+<span class="nc" id="L321">        this.updatedAt = LocalDateTime.now();</span>
+<span class="nc" id="L322">    }</span>
+    
+    /**
+     * Withdraws amount from account
+     * @param amount Amount to withdraw
+     * @throws IllegalArgumentException if amount is negative or zero
+     * @throws IllegalStateException if insufficient funds
+     */
+    public void withdraw(BigDecimal amount) {
+<span class="nc bnc" id="L331" title="All 2 branches missed.">        if (amount.compareTo(BigDecimal.ZERO) &lt;= 0) {</span>
+<span class="nc" id="L332">            throw new IllegalArgumentException(&quot;Withdrawal amount must be positive&quot;);</span>
+        }
+<span class="nc bnc" id="L334" title="All 2 branches missed.">        if (!hasSufficientBalance(amount)) {</span>
+<span class="nc" id="L335">            throw new IllegalStateException(&quot;Insufficient funds&quot;);</span>
+        }
+<span class="nc" id="L337">        this.balance = this.balance.subtract(amount);</span>
+<span class="nc" id="L338">        this.updatedAt = LocalDateTime.now();</span>
+<span class="nc" id="L339">    }</span>
+    
+    @Override
+    public String toString() {
+<span class="nc" id="L343">        return &quot;Account{&quot; +</span>
+                &quot;accountId=&quot; + accountId +
+                &quot;, accountNumber='&quot; + accountNumber + '\'' +
+                &quot;, accountType=&quot; + accountType +
+                &quot;, balance=&quot; + balance +
+                &quot;, currency='&quot; + currency + '\'' +
+                &quot;, status=&quot; + status +
+                '}';
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
