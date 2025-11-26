@@ -44,13 +44,12 @@
 
 ---
 
-## 🧪 Testing Summary for Sofía Pérez Guzmán
+## 🧪 Testing Summary 
 
 ### Project Context
 * **Team/Group:** GROUP 1
 * **Event:** Bootcamp NAO x TecMilenio
 * **Date:** 11/26/25
-* **NAO ID:** 3350 (Sofía Pérez Guzmán)
 * **Project Title:** Testing Procedures for Operational Issues
 * **Repository:** `https://github.com/MelsLores/BankSimCore`
 * **Application:** BankSim Enterprise Banking System
