@@ -1,5 +1,13 @@
 # BankSim Enterprise - Banking System Simulator
 
+## 🎥 Demo Video - Test Execution & Simulator
+
+https://github.com/user-attachments/assets/2025-11-26-04-20-30.mp4
+
+> Video showing comprehensive test execution (72 tests) and interactive banking simulator in action
+
+---
+
 [![Java](https://img.shields.io/badge/Java-17+-orange.svg)](https://www.oracle.com/java/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-blue.svg)](https://www.postgresql.org/)
 [![JUnit](https://img.shields.io/badge/JUnit-5.10-green.svg)](https://junit.org/junit5/)
