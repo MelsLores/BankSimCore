@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AccountRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.banksim.repository</a> &gt; <span class="el_source">AccountRepository.java</span></div><h1>AccountRepository.java</h1><pre class="source lang-java linenums">package com.banksim.repository;
+
+import com.banksim.config.DatabaseConfig;
+import com.banksim.model.Account;
+import java.math.BigDecimal;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Repository for Account entity data access operations.
+ * 
+ * @author Jorge Pena - REM Consultancy
+ * @version 1.0
+ * @since 2024
+ */
+public class AccountRepository {
+    
+    private final DatabaseConfig dbConfig;
+    
+<span class="nc" id="L22">    public AccountRepository() {</span>
+<span class="nc" id="L23">        this.dbConfig = DatabaseConfig.getInstance();</span>
+<span class="nc" id="L24">    }</span>
+    
+    /**
+     * Creates a new account
+     * 
+     * @param account Account entity
+     * @return Created account with ID
+     * @throws SQLException if error occurs
+     */
+    public Account create(Account account) throws SQLException {
+<span class="nc" id="L34">        String sql = &quot;INSERT INTO accounts (customer_id, account_number, bank_code, branch_code, account_type, &quot; +</span>
+                     &quot;balance, currency, status, interest_rate, overdraft_limit) &quot; +
+                     &quot;VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING account_id, created_at, updated_at&quot;;
+        
+<span class="nc" id="L38">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L39">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L41">            stmt.setInt(1, account.getCustomerId());</span>
+<span class="nc" id="L42">            stmt.setString(2, account.getAccountNumber());</span>
+<span class="nc" id="L43">            stmt.setString(3, account.getBankCode());</span>
+<span class="nc" id="L44">            stmt.setString(4, account.getBranchCode());</span>
+<span class="nc" id="L45">            stmt.setString(5, account.getAccountType().name());</span>
+<span class="nc" id="L46">            stmt.setBigDecimal(6, account.getBalance());</span>
+<span class="nc" id="L47">            stmt.setString(7, account.getCurrency());</span>
+<span class="nc" id="L48">            stmt.setString(8, account.getStatus().name());</span>
+<span class="nc" id="L49">            stmt.setBigDecimal(9, account.getInterestRate());</span>
+<span class="nc" id="L50">            stmt.setBigDecimal(10, account.getOverdraftLimit());</span>
+            
+<span class="nc" id="L52">            ResultSet rs = stmt.executeQuery();</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L54">                account.setAccountId(rs.getInt(&quot;account_id&quot;));</span>
+<span class="nc" id="L55">                account.setCreatedAt(rs.getTimestamp(&quot;created_at&quot;).toLocalDateTime());</span>
+<span class="nc" id="L56">                account.setUpdatedAt(rs.getTimestamp(&quot;updated_at&quot;).toLocalDateTime());</span>
+            }
+            
+<span class="nc" id="L59">            return account;</span>
+        }
+    }
+    
+    /**
+     * Finds account by ID
+     * 
+     * @param accountId Account ID
+     * @return Optional with account
+     * @throws SQLException if error occurs
+     */
+    public Optional&lt;Account&gt; findById(Integer accountId) throws SQLException {
+<span class="nc" id="L71">        String sql = &quot;SELECT * FROM accounts WHERE account_id = ?&quot;;</span>
+        
+<span class="nc" id="L73">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L74">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L76">            stmt.setInt(1, accountId);</span>
+<span class="nc" id="L77">            ResultSet rs = stmt.executeQuery();</span>
+            
+<span class="nc bnc" id="L79" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L80">                return Optional.of(mapResultSetToAccount(rs));</span>
+            }
+            
+<span class="nc" id="L83">            return Optional.empty();</span>
+<span class="nc bnc" id="L84" title="All 4 branches missed.">        }</span>
+    }
+    
+    /**
+     * Finds account by account number
+     * 
+     * @param accountNumber Full account number
+     * @return Optional with account
+     * @throws SQLException if error occurs
+     */
+    public Optional&lt;Account&gt; findByAccountNumber(String accountNumber) throws SQLException {
+<span class="nc" id="L95">        String sql = &quot;SELECT * FROM accounts WHERE account_number = ?&quot;;</span>
+        
+<span class="nc" id="L97">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L98">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L100">            stmt.setString(1, accountNumber);</span>
+<span class="nc" id="L101">            ResultSet rs = stmt.executeQuery();</span>
+            
+<span class="nc bnc" id="L103" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L104">                return Optional.of(mapResultSetToAccount(rs));</span>
+            }
+            
+<span class="nc" id="L107">            return Optional.empty();</span>
+<span class="nc bnc" id="L108" title="All 4 branches missed.">        }</span>
+    }
+    
+    /**
+     * Finds all accounts for a customer
+     * 
+     * @param customerId Customer ID
+     * @return List of accounts
+     * @throws SQLException if error occurs
+     */
+    public List&lt;Account&gt; findByCustomerId(Integer customerId) throws SQLException {
+<span class="nc" id="L119">        String sql = &quot;SELECT * FROM accounts WHERE customer_id = ? ORDER BY created_at DESC&quot;;</span>
+<span class="nc" id="L120">        List&lt;Account&gt; accounts = new ArrayList&lt;&gt;();</span>
+        
+<span class="nc" id="L122">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L123">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L125">            stmt.setInt(1, customerId);</span>
+<span class="nc" id="L126">            ResultSet rs = stmt.executeQuery();</span>
+            
+<span class="nc bnc" id="L128" title="All 2 branches missed.">            while (rs.next()) {</span>
+<span class="nc" id="L129">                accounts.add(mapResultSetToAccount(rs));</span>
+            }
+        }
+        
+<span class="nc" id="L133">        return accounts;</span>
+    }
+    
+    /**
+     * Updates account information
+     * 
+     * @param account Account with updates
+     * @return Updated account
+     * @throws SQLException if error occurs
+     */
+    public Account update(Account account) throws SQLException {
+<span class="nc" id="L144">        String sql = &quot;UPDATE accounts SET balance = ?, status = ?, interest_rate = ?, overdraft_limit = ? &quot; +</span>
+                     &quot;WHERE account_id = ?&quot;;
+        
+<span class="nc" id="L147">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L148">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L150">            stmt.setBigDecimal(1, account.getBalance());</span>
+<span class="nc" id="L151">            stmt.setString(2, account.getStatus().name());</span>
+<span class="nc" id="L152">            stmt.setBigDecimal(3, account.getInterestRate());</span>
+<span class="nc" id="L153">            stmt.setBigDecimal(4, account.getOverdraftLimit());</span>
+<span class="nc" id="L154">            stmt.setInt(5, account.getAccountId());</span>
+            
+<span class="nc" id="L156">            stmt.executeUpdate();</span>
+<span class="nc" id="L157">            return account;</span>
+        }
+    }
+    
+    /**
+     * Updates account balance (for transactions)
+     * 
+     * @param accountId Account ID
+     * @param newBalance New balance
+     * @throws SQLException if error occurs
+     */
+    public void updateBalance(Integer accountId, BigDecimal newBalance) throws SQLException {
+<span class="nc" id="L169">        String sql = &quot;UPDATE accounts SET balance = ? WHERE account_id = ?&quot;;</span>
+        
+<span class="nc" id="L171">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L172">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L174">            stmt.setBigDecimal(1, newBalance);</span>
+<span class="nc" id="L175">            stmt.setInt(2, accountId);</span>
+<span class="nc" id="L176">            stmt.executeUpdate();</span>
+        }
+<span class="nc" id="L178">    }</span>
+    
+    /**
+     * Finds all accounts with pagination
+     * 
+     * @param limit Records to return
+     * @param offset Records to skip
+     * @return List of accounts
+     * @throws SQLException if error occurs
+     */
+    public List&lt;Account&gt; findAll(int limit, int offset) throws SQLException {
+<span class="nc" id="L189">        String sql = &quot;SELECT * FROM accounts ORDER BY created_at DESC LIMIT ? OFFSET ?&quot;;</span>
+<span class="nc" id="L190">        List&lt;Account&gt; accounts = new ArrayList&lt;&gt;();</span>
+        
+<span class="nc" id="L192">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L193">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L195">            stmt.setInt(1, limit);</span>
+<span class="nc" id="L196">            stmt.setInt(2, offset);</span>
+            
+<span class="nc" id="L198">            ResultSet rs = stmt.executeQuery();</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">            while (rs.next()) {</span>
+<span class="nc" id="L200">                accounts.add(mapResultSetToAccount(rs));</span>
+            }
+        }
+        
+<span class="nc" id="L204">        return accounts;</span>
+    }
+    
+    /**
+     * Finds active accounts for a customer
+     * 
+     * @param customerId Customer ID
+     * @return List of active accounts
+     * @throws SQLException if error occurs
+     */
+    public List&lt;Account&gt; findActiveByCustomerId(Integer customerId) throws SQLException {
+<span class="nc" id="L215">        String sql = &quot;SELECT * FROM accounts WHERE customer_id = ? AND status = 'ACTIVE' ORDER BY created_at DESC&quot;;</span>
+<span class="nc" id="L216">        List&lt;Account&gt; accounts = new ArrayList&lt;&gt;();</span>
+        
+<span class="nc" id="L218">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L219">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L221">            stmt.setInt(1, customerId);</span>
+<span class="nc" id="L222">            ResultSet rs = stmt.executeQuery();</span>
+            
+<span class="nc bnc" id="L224" title="All 2 branches missed.">            while (rs.next()) {</span>
+<span class="nc" id="L225">                accounts.add(mapResultSetToAccount(rs));</span>
+            }
+        }
+        
+<span class="nc" id="L229">        return accounts;</span>
+    }
+    
+    /**
+     * Counts total accounts
+     * 
+     * @return Total count
+     * @throws SQLException if error occurs
+     */
+    public int count() throws SQLException {
+<span class="nc" id="L239">        String sql = &quot;SELECT COUNT(*) FROM accounts&quot;;</span>
+        
+<span class="nc" id="L241">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L242">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L244">            ResultSet rs = stmt.executeQuery();</span>
+<span class="nc bnc" id="L245" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L246">                return rs.getInt(1);</span>
+            }
+            
+<span class="nc" id="L249">            return 0;</span>
+<span class="nc bnc" id="L250" title="All 4 branches missed.">        }</span>
+    }
+    
+    /**
+     * Gets total balance for all accounts
+     * 
+     * @return Total balance
+     * @throws SQLException if error occurs
+     */
+    public BigDecimal getTotalBalance() throws SQLException {
+<span class="nc" id="L260">        String sql = &quot;SELECT COALESCE(SUM(balance), 0) FROM accounts WHERE status = 'ACTIVE'&quot;;</span>
+        
+<span class="nc" id="L262">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L263">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L265">            ResultSet rs = stmt.executeQuery();</span>
+<span class="nc bnc" id="L266" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L267">                return rs.getBigDecimal(1);</span>
+            }
+            
+<span class="nc" id="L270">            return BigDecimal.ZERO;</span>
+<span class="nc bnc" id="L271" title="All 4 branches missed.">        }</span>
+    }
+    
+    /**
+     * Checks if account number exists
+     * 
+     * @param accountNumber Account number to check
+     * @return true if exists
+     * @throws SQLException if error occurs
+     */
+    public boolean existsByAccountNumber(String accountNumber) throws SQLException {
+<span class="nc" id="L282">        String sql = &quot;SELECT COUNT(*) FROM accounts WHERE account_number = ?&quot;;</span>
+        
+<span class="nc" id="L284">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L285">             PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+            
+<span class="nc" id="L287">            stmt.setString(1, accountNumber);</span>
+<span class="nc" id="L288">            ResultSet rs = stmt.executeQuery();</span>
+            
+<span class="nc bnc" id="L290" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc bnc" id="L291" title="All 2 branches missed.">                return rs.getInt(1) &gt; 0;</span>
+            }
+            
+<span class="nc" id="L294">            return false;</span>
+<span class="nc bnc" id="L295" title="All 4 branches missed.">        }</span>
+    }
+    
+    /**
+     * Maps ResultSet to Account entity
+     * 
+     * @param rs ResultSet
+     * @return Account entity
+     * @throws SQLException if error occurs
+     */
+    private Account mapResultSetToAccount(ResultSet rs) throws SQLException {
+<span class="nc" id="L306">        Account account = new Account();</span>
+<span class="nc" id="L307">        account.setAccountId(rs.getInt(&quot;account_id&quot;));</span>
+<span class="nc" id="L308">        account.setCustomerId(rs.getInt(&quot;customer_id&quot;));</span>
+<span class="nc" id="L309">        account.setAccountNumber(rs.getString(&quot;account_number&quot;));</span>
+<span class="nc" id="L310">        account.setBankCode(rs.getString(&quot;bank_code&quot;));</span>
+<span class="nc" id="L311">        account.setBranchCode(rs.getString(&quot;branch_code&quot;));</span>
+<span class="nc" id="L312">        account.setAccountType(Account.AccountType.valueOf(rs.getString(&quot;account_type&quot;)));</span>
+<span class="nc" id="L313">        account.setBalance(rs.getBigDecimal(&quot;balance&quot;));</span>
+<span class="nc" id="L314">        account.setCurrency(rs.getString(&quot;currency&quot;));</span>
+<span class="nc" id="L315">        account.setStatus(Account.AccountStatus.valueOf(rs.getString(&quot;status&quot;)));</span>
+<span class="nc" id="L316">        account.setInterestRate(rs.getBigDecimal(&quot;interest_rate&quot;));</span>
+<span class="nc" id="L317">        account.setOverdraftLimit(rs.getBigDecimal(&quot;overdraft_limit&quot;));</span>
+<span class="nc" id="L318">        account.setCreatedAt(rs.getTimestamp(&quot;created_at&quot;).toLocalDateTime());</span>
+<span class="nc" id="L319">        account.setUpdatedAt(rs.getTimestamp(&quot;updated_at&quot;).toLocalDateTime());</span>
+        
+<span class="nc" id="L321">        return account;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BankSimServerDB.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.banksim</a> &gt; <span class="el_source">BankSimServerDB.java</span></div><h1>BankSimServerDB.java</h1><pre class="source lang-java linenums">package com.banksim;
+
+import com.banksim.config.DatabaseConfig;
+import com.banksim.model.User;
+import com.banksim.repository.UserRepository;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
+
+import java.io.*;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.Optional;
+
+/**
+ * BankSim Server with Database Integration
+ * Serves static files and provides basic API endpoints with PostgreSQL
+ * 
+ * @author Jorge Pena - REM Consultancy
+ * @version 2.0
+ * @since 2024
+ */
+<span class="nc" id="L29">public class BankSimServerDB {</span>
+    
+    private static final int PORT = 8080;
+    private static DatabaseConfig dbConfig;
+    
+    public static void main(String[] args) {
+        try {
+            // Initialize database
+<span class="nc" id="L37">            System.out.println(&quot;=== BankSim Server with Database ===&quot;);</span>
+<span class="nc" id="L38">            dbConfig = DatabaseConfig.getInstance();</span>
+<span class="nc" id="L39">            System.out.println(&quot;âœ“ Database configured: &quot; + dbConfig.getJdbcUrl());</span>
+            
+            // Test database connection
+<span class="nc" id="L42">            testDatabaseConnection();</span>
+            
+            // Create HTTP server
+<span class="nc" id="L45">            HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);</span>
+            
+            // Register handlers
+<span class="nc" id="L48">            server.createContext(&quot;/&quot;, new StaticFileHandler());</span>
+<span class="nc" id="L49">            server.createContext(&quot;/api/status&quot;, new StatusHandler());</span>
+<span class="nc" id="L50">            server.createContext(&quot;/api/db/users&quot;, new UsersHandler());</span>
+<span class="nc" id="L51">            server.createContext(&quot;/api/db/test&quot;, new DBTestHandler());</span>
+<span class="nc" id="L52">            server.createContext(&quot;/api/auth/login&quot;, new SimpleLoginHandler());</span>
+            
+            // Start server
+<span class="nc" id="L55">            server.setExecutor(null);</span>
+<span class="nc" id="L56">            server.start();</span>
+            
+<span class="nc" id="L58">            System.out.println(&quot;âœ“ Server running on http://localhost:&quot; + PORT);</span>
+<span class="nc" id="L59">            System.out.println(&quot;âœ“ Database: Connected to PostgreSQL&quot;);</span>
+<span class="nc" id="L60">            System.out.println(&quot;\nEndpoints disponibles:&quot;);</span>
+<span class="nc" id="L61">            System.out.println(&quot;  GET  /                 - PÃ¡gina principal&quot;);</span>
+<span class="nc" id="L62">            System.out.println(&quot;  GET  /api/status       - Estado del servidor&quot;);</span>
+<span class="nc" id="L63">            System.out.println(&quot;  GET  /api/db/test      - Probar conexiÃ³n a base de datos&quot;);</span>
+<span class="nc" id="L64">            System.out.println(&quot;  GET  /api/db/users     - Listar usuarios&quot;);</span>
+<span class="nc" id="L65">            System.out.println(&quot;  POST /api/auth/login   - Login simple (demo mode)&quot;);</span>
+<span class="nc" id="L66">            System.out.println(&quot;\nPresiona Ctrl+C para detener el servidor&quot;);</span>
+            
+<span class="nc" id="L68">        } catch (Exception e) {</span>
+<span class="nc" id="L69">            System.err.println(&quot;Error starting server: &quot; + e.getMessage());</span>
+<span class="nc" id="L70">            e.printStackTrace();</span>
+<span class="nc" id="L71">        }</span>
+<span class="nc" id="L72">    }</span>
+    
+    /**
+     * Tests database connection
+     */
+    private static void testDatabaseConnection() {
+<span class="nc" id="L78">        try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L79">             Statement stmt = conn.createStatement()) {</span>
+            
+<span class="nc" id="L81">            ResultSet rs = stmt.executeQuery(&quot;SELECT COUNT(*) as user_count FROM users&quot;);</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L83">                int userCount = rs.getInt(&quot;user_count&quot;);</span>
+<span class="nc" id="L84">                System.out.println(&quot;âœ“ Database connection successful - &quot; + userCount + &quot; users found&quot;);</span>
+            }
+<span class="nc" id="L86">        } catch (Exception e) {</span>
+<span class="nc" id="L87">            System.err.println(&quot;âš  Database connection test failed: &quot; + e.getMessage());</span>
+<span class="nc" id="L88">        }</span>
+<span class="nc" id="L89">    }</span>
+    
+    /**
+     * Handler for static files
+     */
+<span class="nc" id="L94">    static class StaticFileHandler implements HttpHandler {</span>
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+<span class="nc" id="L97">            String path = exchange.getRequestURI().getPath();</span>
+            
+            // Default to index.html
+<span class="nc bnc" id="L100" title="All 4 branches missed.">            if (path.equals(&quot;/&quot;) || path.isEmpty()) {</span>
+<span class="nc" id="L101">                path = &quot;/index.html&quot;;</span>
+            }
+            
+            // Security: prevent directory traversal
+<span class="nc bnc" id="L105" title="All 2 branches missed.">            if (path.contains(&quot;..&quot;)) {</span>
+<span class="nc" id="L106">                sendResponse(exchange, 403, &quot;Forbidden&quot;);</span>
+<span class="nc" id="L107">                return;</span>
+            }
+            
+            // Try to serve from static directory
+<span class="nc" id="L111">            Path filePath = Paths.get(&quot;src/main/resources/static&quot; + path);</span>
+            
+<span class="nc bnc" id="L113" title="All 4 branches missed.">            if (Files.exists(filePath) &amp;&amp; !Files.isDirectory(filePath)) {</span>
+<span class="nc" id="L114">                String contentType = getContentType(path);</span>
+<span class="nc" id="L115">                byte[] content = Files.readAllBytes(filePath);</span>
+                
+<span class="nc" id="L117">                exchange.getResponseHeaders().add(&quot;Content-Type&quot;, contentType);</span>
+<span class="nc" id="L118">                exchange.sendResponseHeaders(200, content.length);</span>
+                
+<span class="nc" id="L120">                try (OutputStream os = exchange.getResponseBody()) {</span>
+<span class="nc" id="L121">                    os.write(content);</span>
+                }
+<span class="nc" id="L123">            } else {</span>
+<span class="nc" id="L124">                sendResponse(exchange, 404, &quot;File not found: &quot; + path);</span>
+            }
+<span class="nc" id="L126">        }</span>
+        
+        private String getContentType(String path) {
+<span class="nc bnc" id="L129" title="All 2 branches missed.">            if (path.endsWith(&quot;.html&quot;)) return &quot;text/html;charset=UTF-8&quot;;</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">            if (path.endsWith(&quot;.css&quot;)) return &quot;text/css;charset=UTF-8&quot;;</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">            if (path.endsWith(&quot;.js&quot;)) return &quot;application/javascript;charset=UTF-8&quot;;</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">            if (path.endsWith(&quot;.json&quot;)) return &quot;application/json;charset=UTF-8&quot;;</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">            if (path.endsWith(&quot;.png&quot;)) return &quot;image/png&quot;;</span>
+<span class="nc bnc" id="L134" title="All 4 branches missed.">            if (path.endsWith(&quot;.jpg&quot;) || path.endsWith(&quot;.jpeg&quot;)) return &quot;image/jpeg&quot;;</span>
+<span class="nc" id="L135">            return &quot;text/plain;charset=UTF-8&quot;;</span>
+        }
+    }
+    
+    /**
+     * Handler for server status
+     */
+<span class="nc" id="L142">    static class StatusHandler implements HttpHandler {</span>
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+<span class="nc" id="L145">            StringBuilder json = new StringBuilder();</span>
+<span class="nc" id="L146">            json.append(&quot;{&quot;);</span>
+<span class="nc" id="L147">            json.append(&quot;\&quot;status\&quot;:\&quot;running\&quot;,&quot;);</span>
+<span class="nc" id="L148">            json.append(&quot;\&quot;server\&quot;:\&quot;BankSim with Database\&quot;,&quot;);</span>
+<span class="nc" id="L149">            json.append(&quot;\&quot;version\&quot;:\&quot;2.0\&quot;,&quot;);</span>
+<span class="nc" id="L150">            json.append(&quot;\&quot;database\&quot;:&quot;);</span>
+            
+            // Test database
+<span class="nc" id="L153">            boolean dbConnected = false;</span>
+<span class="nc" id="L154">            try (Connection conn = dbConfig.getConnection()) {</span>
+<span class="nc" id="L155">                dbConnected = conn.isValid(2);</span>
+<span class="nc" id="L156">            } catch (Exception e) {</span>
+                // Connection failed
+<span class="nc" id="L158">            }</span>
+            
+<span class="nc" id="L160">            json.append(&quot;{\&quot;connected\&quot;:&quot;).append(dbConnected);</span>
+<span class="nc" id="L161">            json.append(&quot;,\&quot;url\&quot;:\&quot;&quot;).append(dbConfig.getJdbcUrl()).append(&quot;\&quot;}&quot;);</span>
+<span class="nc" id="L162">            json.append(&quot;}&quot;);</span>
+            
+<span class="nc" id="L164">            sendJsonResponse(exchange, 200, json.toString());</span>
+<span class="nc" id="L165">        }</span>
+    }
+    
+    /**
+     * Handler for database test
+     */
+<span class="nc" id="L171">    static class DBTestHandler implements HttpHandler {</span>
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+<span class="nc" id="L174">            try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L175">                 Statement stmt = conn.createStatement()) {</span>
+                
+<span class="nc" id="L177">                ResultSet rs = stmt.executeQuery(</span>
+                    &quot;SELECT COUNT(*) as user_count, &quot; +
+                    &quot;(SELECT COUNT(*) FROM customers) as customer_count, &quot; +
+                    &quot;(SELECT COUNT(*) FROM accounts) as account_count &quot; +
+                    &quot;FROM users&quot;
+                );
+                
+<span class="nc bnc" id="L184" title="All 2 branches missed.">                if (rs.next()) {</span>
+<span class="nc" id="L185">                    int users = rs.getInt(&quot;user_count&quot;);</span>
+<span class="nc" id="L186">                    int customers = rs.getInt(&quot;customer_count&quot;);</span>
+<span class="nc" id="L187">                    int accounts = rs.getInt(&quot;account_count&quot;);</span>
+                    
+<span class="nc" id="L189">                    String json = String.format(</span>
+                        &quot;{\&quot;success\&quot;:true,\&quot;users\&quot;:%d,\&quot;customers\&quot;:%d,\&quot;accounts\&quot;:%d}&quot;,
+<span class="nc" id="L191">                        users, customers, accounts</span>
+                    );
+                    
+<span class="nc" id="L194">                    sendJsonResponse(exchange, 200, json);</span>
+<span class="nc" id="L195">                } else {</span>
+<span class="nc" id="L196">                    sendJsonResponse(exchange, 500, &quot;{\&quot;success\&quot;:false,\&quot;error\&quot;:\&quot;No data\&quot;}&quot;);</span>
+                }
+                
+<span class="nc" id="L199">            } catch (Exception e) {</span>
+<span class="nc" id="L200">                String json = String.format(</span>
+                    &quot;{\&quot;success\&quot;:false,\&quot;error\&quot;:\&quot;%s\&quot;}&quot;,
+<span class="nc" id="L202">                    e.getMessage().replace(&quot;\&quot;&quot;, &quot;\\\&quot;&quot;)</span>
+                );
+<span class="nc" id="L204">                sendJsonResponse(exchange, 500, json);</span>
+<span class="nc" id="L205">            }</span>
+<span class="nc" id="L206">        }</span>
+    }
+    
+    /**
+     * Handler for users list
+     */
+<span class="nc" id="L212">    static class UsersHandler implements HttpHandler {</span>
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            try {
+<span class="nc" id="L216">                try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L217">                     Statement stmt = conn.createStatement()) {</span>
+                    
+<span class="nc" id="L219">                    ResultSet rs = stmt.executeQuery(</span>
+                        &quot;SELECT user_id, username, email, role, is_active FROM users ORDER BY user_id&quot;
+                    );
+                    
+<span class="nc" id="L223">                    StringBuilder json = new StringBuilder();</span>
+<span class="nc" id="L224">                    json.append(&quot;{\&quot;success\&quot;:true,\&quot;users\&quot;:[&quot;);</span>
+                    
+<span class="nc" id="L226">                    boolean first = true;</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">                    while (rs.next()) {</span>
+<span class="nc bnc" id="L228" title="All 2 branches missed.">                        if (!first) json.append(&quot;,&quot;);</span>
+<span class="nc" id="L229">                        json.append(&quot;{&quot;);</span>
+<span class="nc" id="L230">                        json.append(&quot;\&quot;userId\&quot;:&quot;).append(rs.getInt(&quot;user_id&quot;)).append(&quot;,&quot;);</span>
+<span class="nc" id="L231">                        json.append(&quot;\&quot;username\&quot;:\&quot;&quot;).append(rs.getString(&quot;username&quot;)).append(&quot;\&quot;,&quot;);</span>
+<span class="nc" id="L232">                        json.append(&quot;\&quot;email\&quot;:\&quot;&quot;).append(rs.getString(&quot;email&quot;)).append(&quot;\&quot;,&quot;);</span>
+<span class="nc" id="L233">                        json.append(&quot;\&quot;role\&quot;:\&quot;&quot;).append(rs.getString(&quot;role&quot;)).append(&quot;\&quot;,&quot;);</span>
+<span class="nc" id="L234">                        json.append(&quot;\&quot;isActive\&quot;:&quot;).append(rs.getBoolean(&quot;is_active&quot;));</span>
+<span class="nc" id="L235">                        json.append(&quot;}&quot;);</span>
+<span class="nc" id="L236">                        first = false;</span>
+                    }
+                    
+<span class="nc" id="L239">                    json.append(&quot;]}&quot;);</span>
+<span class="nc" id="L240">                    sendJsonResponse(exchange, 200, json.toString());</span>
+                }
+                
+<span class="nc" id="L243">            } catch (Exception e) {</span>
+<span class="nc" id="L244">                String json = String.format(</span>
+                    &quot;{\&quot;success\&quot;:false,\&quot;error\&quot;:\&quot;%s\&quot;}&quot;,
+<span class="nc" id="L246">                    e.getMessage().replace(&quot;\&quot;&quot;, &quot;\\\&quot;&quot;)</span>
+                );
+<span class="nc" id="L248">                sendJsonResponse(exchange, 500, json);</span>
+<span class="nc" id="L249">            }</span>
+<span class="nc" id="L250">        }</span>
+    }
+    
+    /**
+     * Simple login handler - validates credentials against database
+     */
+<span class="nc" id="L256">    static class SimpleLoginHandler implements HttpHandler {</span>
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            // Add CORS headers
+<span class="nc" id="L260">            exchange.getResponseHeaders().add(&quot;Access-Control-Allow-Origin&quot;, &quot;*&quot;);</span>
+<span class="nc" id="L261">            exchange.getResponseHeaders().add(&quot;Access-Control-Allow-Methods&quot;, &quot;POST, OPTIONS&quot;);</span>
+<span class="nc" id="L262">            exchange.getResponseHeaders().add(&quot;Access-Control-Allow-Headers&quot;, &quot;Content-Type&quot;);</span>
+            
+            // Handle preflight
+<span class="nc bnc" id="L265" title="All 2 branches missed.">            if (&quot;OPTIONS&quot;.equals(exchange.getRequestMethod())) {</span>
+<span class="nc" id="L266">                exchange.sendResponseHeaders(204, -1);</span>
+<span class="nc" id="L267">                return;</span>
+            }
+            
+<span class="nc bnc" id="L270" title="All 2 branches missed.">            if (!&quot;POST&quot;.equals(exchange.getRequestMethod())) {</span>
+<span class="nc" id="L271">                sendJsonResponse(exchange, 405, &quot;{\&quot;success\&quot;:false,\&quot;error\&quot;:\&quot;Method not allowed\&quot;}&quot;);</span>
+<span class="nc" id="L272">                return;</span>
+            }
+            
+            try {
+                // Read request body
+<span class="nc" id="L277">                BufferedReader reader = new BufferedReader(</span>
+<span class="nc" id="L278">                    new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8));</span>
+<span class="nc" id="L279">                StringBuilder body = new StringBuilder();</span>
+                String line;
+<span class="nc bnc" id="L281" title="All 2 branches missed.">                while ((line = reader.readLine()) != null) {</span>
+<span class="nc" id="L282">                    body.append(line);</span>
+                }
+                
+                // Simple JSON parsing for username and password
+<span class="nc" id="L286">                String jsonBody = body.toString();</span>
+<span class="nc" id="L287">                String username = extractJsonValue(jsonBody, &quot;username&quot;);</span>
+<span class="nc" id="L288">                String password = extractJsonValue(jsonBody, &quot;password&quot;);</span>
+                
+<span class="nc bnc" id="L290" title="All 4 branches missed.">                if (username == null || password == null) {</span>
+<span class="nc" id="L291">                    sendJsonResponse(exchange, 400, </span>
+                        &quot;{\&quot;success\&quot;:false,\&quot;error\&quot;:\&quot;Username and password required\&quot;}&quot;);
+<span class="nc" id="L293">                    return;</span>
+                }
+                
+                // Check database
+<span class="nc" id="L297">                try (Connection conn = dbConfig.getConnection();</span>
+<span class="nc" id="L298">                     Statement stmt = conn.createStatement()) {</span>
+                    
+                    // For demo purposes, just check if user exists
+<span class="nc" id="L301">                    String query = String.format(</span>
+                        &quot;SELECT user_id, username, email, role FROM users WHERE username = '%s' OR email = '%s'&quot;,
+<span class="nc" id="L303">                        username.replace(&quot;'&quot;, &quot;''&quot;), username.replace(&quot;'&quot;, &quot;''&quot;)</span>
+                    );
+                    
+<span class="nc" id="L306">                    ResultSet rs = stmt.executeQuery(query);</span>
+                    
+<span class="nc bnc" id="L308" title="All 2 branches missed.">                    if (rs.next()) {</span>
+<span class="nc" id="L309">                        int userId = rs.getInt(&quot;user_id&quot;);</span>
+<span class="nc" id="L310">                        String dbUsername = rs.getString(&quot;username&quot;);</span>
+<span class="nc" id="L311">                        String email = rs.getString(&quot;email&quot;);</span>
+<span class="nc" id="L312">                        String role = rs.getString(&quot;role&quot;);</span>
+                        
+                        // Simple success response (in production, verify password hash)
+<span class="nc" id="L315">                        String json = String.format(</span>
+                            &quot;{\&quot;success\&quot;:true,\&quot;accessToken\&quot;:\&quot;demo-token-%d\&quot;,&quot; +
+                            &quot;\&quot;userId\&quot;:%d,\&quot;username\&quot;:\&quot;%s\&quot;,\&quot;email\&quot;:\&quot;%s\&quot;,\&quot;role\&quot;:\&quot;%s\&quot;,&quot; +
+                            &quot;\&quot;message\&quot;:\&quot;Login exitoso (demo mode)\&quot;}&quot;,
+<span class="nc" id="L319">                            userId, userId, dbUsername, email, role</span>
+                        );
+                        
+<span class="nc" id="L322">                        sendJsonResponse(exchange, 200, json);</span>
+<span class="nc" id="L323">                    } else {</span>
+<span class="nc" id="L324">                        sendJsonResponse(exchange, 401, </span>
+                            &quot;{\&quot;success\&quot;:false,\&quot;error\&quot;:\&quot;Usuario no encontrado\&quot;}&quot;);
+                    }
+                }
+                
+<span class="nc" id="L329">            } catch (Exception e) {</span>
+<span class="nc" id="L330">                String json = String.format(</span>
+                    &quot;{\&quot;success\&quot;:false,\&quot;error\&quot;:\&quot;%s\&quot;}&quot;,
+<span class="nc" id="L332">                    e.getMessage().replace(&quot;\&quot;&quot;, &quot;\\\&quot;&quot;)</span>
+                );
+<span class="nc" id="L334">                sendJsonResponse(exchange, 500, json);</span>
+<span class="nc" id="L335">            }</span>
+<span class="nc" id="L336">        }</span>
+        
+        private String extractJsonValue(String json, String key) {
+<span class="nc" id="L339">            String pattern = &quot;\&quot;&quot; + key + &quot;\&quot;\\s*:\\s*\&quot;([^\&quot;]+)\&quot;&quot;;</span>
+<span class="nc" id="L340">            java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);</span>
+<span class="nc" id="L341">            java.util.regex.Matcher m = p.matcher(json);</span>
+<span class="nc bnc" id="L342" title="All 2 branches missed.">            if (m.find()) {</span>
+<span class="nc" id="L343">                return m.group(1);</span>
+            }
+<span class="nc" id="L345">            return null;</span>
+        }
+    }
+    
+    /**
+     * Sends a JSON response
+     */
+    private static void sendJsonResponse(HttpExchange exchange, int statusCode, String jsonContent) throws IOException {
+<span class="nc" id="L353">        exchange.getResponseHeaders().add(&quot;Content-Type&quot;, &quot;application/json;charset=UTF-8&quot;);</span>
+<span class="nc" id="L354">        exchange.getResponseHeaders().add(&quot;Access-Control-Allow-Origin&quot;, &quot;*&quot;);</span>
+        
+<span class="nc" id="L356">        byte[] bytes = jsonContent.getBytes(StandardCharsets.UTF_8);</span>
+<span class="nc" id="L357">        exchange.sendResponseHeaders(statusCode, bytes.length);</span>
+        
+<span class="nc" id="L359">        try (OutputStream os = exchange.getResponseBody()) {</span>
+<span class="nc" id="L360">            os.write(bytes);</span>
+        }
+<span class="nc" id="L362">    }</span>
+    
+    /**
+     * Sends a plain text response
+     */
+    private static void sendResponse(HttpExchange exchange, int statusCode, String message) throws IOException {
+<span class="nc" id="L368">        byte[] bytes = message.getBytes(StandardCharsets.UTF_8);</span>
+<span class="nc" id="L369">        exchange.sendResponseHeaders(statusCode, bytes.length);</span>
+        
+<span class="nc" id="L371">        try (OutputStream os = exchange.getResponseBody()) {</span>
+<span class="nc" id="L372">            os.write(bytes);</span>
+        }
+<span class="nc" id="L374">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

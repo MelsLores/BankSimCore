@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ValidationTestService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.banksim.service</a> &gt; <span class="el_source">ValidationTestService.java</span></div><h1>ValidationTestService.java</h1><pre class="source lang-java linenums">package com.banksim.service;
+
+import com.banksim.util.ValidationUtil;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Validation service for the 12 test cases from PDF specification.
+ * Implements equivalence class testing for banking operations.
+ * 
+ * @author Jorge Pena - REM Consultancy
+ * @version 1.0
+ * @since 2024
+ */
+<span class="fc" id="L17">public class ValidationTestService {</span>
+    
+    /**
+     * Runs all 12 test cases
+     * 
+     * @return List of test results
+     */
+    public List&lt;Map&lt;String, Object&gt;&gt; runAllTests() {
+<span class="fc" id="L25">        List&lt;Map&lt;String, Object&gt;&gt; results = new ArrayList&lt;&gt;();</span>
+        
+<span class="fc" id="L27">        results.add(runTestCase01());</span>
+<span class="fc" id="L28">        results.add(runTestCase02());</span>
+<span class="fc" id="L29">        results.add(runTestCase03());</span>
+<span class="fc" id="L30">        results.add(runTestCase04());</span>
+<span class="fc" id="L31">        results.add(runTestCase05());</span>
+<span class="fc" id="L32">        results.add(runTestCase06());</span>
+<span class="fc" id="L33">        results.add(runTestCase07());</span>
+<span class="fc" id="L34">        results.add(runTestCase08());</span>
+<span class="fc" id="L35">        results.add(runTestCase09());</span>
+<span class="fc" id="L36">        results.add(runTestCase10());</span>
+<span class="fc" id="L37">        results.add(runTestCase11());</span>
+<span class="fc" id="L38">        results.add(runTestCase12());</span>
+        
+<span class="fc" id="L40">        return results;</span>
+    }
+    
+    /**
+     * TC01: Valid bank code, branch code, account number, and personal key
+     * Expected: PASS (Valid)
+     */
+    public Map&lt;String, Object&gt; runTestCase01() {
+<span class="fc" id="L48">        String bankCode = &quot;123&quot;;</span>
+<span class="fc" id="L49">        String branchCode = &quot;4567&quot;;</span>
+<span class="fc" id="L50">        String accountNumber = &quot;1234567890&quot;;</span>
+<span class="fc" id="L51">        String personalKey = &quot;Abcd1234&quot;;</span>
+        
+<span class="fc" id="L53">        boolean bankValid = ValidationUtil.isValidBankCode(bankCode);</span>
+<span class="fc" id="L54">        boolean branchValid = ValidationUtil.isValidBranchCode(branchCode);</span>
+<span class="fc" id="L55">        boolean accountValid = ValidationUtil.isValidAccountNumber(accountNumber);</span>
+<span class="fc" id="L56">        boolean keyValid = ValidationUtil.isValidPersonalKey(personalKey);</span>
+        
+<span class="pc bpc" id="L58" title="4 of 8 branches missed.">        boolean passed = bankValid &amp;&amp; branchValid &amp;&amp; accountValid &amp;&amp; keyValid;</span>
+        
+<span class="fc" id="L60">        return createTestResult(</span>
+            &quot;TC01&quot;,
+            &quot;Valid bank code, branch code, account number, and personal key&quot;,
+            bankCode, branchCode, accountNumber, personalKey,
+            true,
+            passed,
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">            passed ? &quot;All validations passed&quot; : &quot;Validation failed&quot;</span>
+        );
+    }
+    
+    /**
+     * TC02: Invalid bank code (only 2 digits)
+     * Expected: FAIL (Invalid)
+     */
+    public Map&lt;String, Object&gt; runTestCase02() {
+<span class="fc" id="L75">        String bankCode = &quot;12&quot;;</span>
+<span class="fc" id="L76">        String branchCode = &quot;4567&quot;;</span>
+<span class="fc" id="L77">        String accountNumber = &quot;1234567890&quot;;</span>
+<span class="fc" id="L78">        String personalKey = &quot;Abcd1234&quot;;</span>
+        
+<span class="fc" id="L80">        boolean bankValid = ValidationUtil.isValidBankCode(bankCode);</span>
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">        boolean passed = !bankValid;</span>
+        
+<span class="fc" id="L83">        return createTestResult(</span>
+            &quot;TC02&quot;,
+            &quot;Invalid bank code (only 2 digits)&quot;,
+            bankCode, branchCode, accountNumber, personalKey,
+            false,
+            passed,
+<span class="fc" id="L89">            ValidationUtil.getBankCodeError(bankCode)</span>
+        );
+    }
+    
+    /**
+     * TC03: Invalid branch code (5 digits instead of 4)
+     * Expected: FAIL (Invalid)
+     */
+    public Map&lt;String, Object&gt; runTestCase03() {
+<span class="fc" id="L98">        String bankCode = &quot;123&quot;;</span>
+<span class="fc" id="L99">        String branchCode = &quot;45678&quot;;</span>
+<span class="fc" id="L100">        String accountNumber = &quot;1234567890&quot;;</span>
+<span class="fc" id="L101">        String personalKey = &quot;Abcd1234&quot;;</span>
+        
+<span class="fc" id="L103">        boolean branchValid = ValidationUtil.isValidBranchCode(branchCode);</span>
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">        boolean passed = !branchValid;</span>
+        
+<span class="fc" id="L106">        return createTestResult(</span>
+            &quot;TC03&quot;,
+            &quot;Invalid branch code (5 digits instead of 4)&quot;,
+            bankCode, branchCode, accountNumber, personalKey,
+            false,
+            passed,
+<span class="fc" id="L112">            ValidationUtil.getBranchCodeError(branchCode)</span>
+        );
+    }
+    
+    /**
+     * TC04: Invalid account number (9 digits instead of 10)
+     * Expected: FAIL (Invalid)
+     */
+    public Map&lt;String, Object&gt; runTestCase04() {
+<span class="fc" id="L121">        String bankCode = &quot;123&quot;;</span>
+<span class="fc" id="L122">        String branchCode = &quot;4567&quot;;</span>
+<span class="fc" id="L123">        String accountNumber = &quot;123456789&quot;;</span>
+<span class="fc" id="L124">        String personalKey = &quot;Abcd1234&quot;;</span>
+        
+<span class="fc" id="L126">        boolean accountValid = ValidationUtil.isValidAccountNumber(accountNumber);</span>
+<span class="pc bpc" id="L127" title="1 of 2 branches missed.">        boolean passed = !accountValid;</span>
+        
+<span class="fc" id="L129">        return createTestResult(</span>
+            &quot;TC04&quot;,
+            &quot;Invalid account number (9 digits instead of 10)&quot;,
+            bankCode, branchCode, accountNumber, personalKey,
+            false,
+            passed,
+<span class="fc" id="L135">            ValidationUtil.getAccountNumberError(accountNumber)</span>
+        );
+    }
+    
+    /**
+     * TC05: Invalid personal key (less than 8 characters)
+     * Expected: FAIL (Invalid)
+     */
+    public Map&lt;String, Object&gt; runTestCase05() {
+<span class="fc" id="L144">        String bankCode = &quot;123&quot;;</span>
+<span class="fc" id="L145">        String branchCode = &quot;4567&quot;;</span>
+<span class="fc" id="L146">        String accountNumber = &quot;1234567890&quot;;</span>
+<span class="fc" id="L147">        String personalKey = &quot;Abc123&quot;;</span>
+        
+<span class="fc" id="L149">        boolean keyValid = ValidationUtil.isValidPersonalKey(personalKey);</span>
+<span class="pc bpc" id="L150" title="1 of 2 branches missed.">        boolean passed = !keyValid;</span>
+        
+<span class="fc" id="L152">        return createTestResult(</span>
+            &quot;TC05&quot;,
+            &quot;Invalid personal key (less than 8 characters)&quot;,
+            bankCode, branchCode, accountNumber, personalKey,
+            false,
+            passed,
+<span class="fc" id="L158">            ValidationUtil.getPersonalKeyError(personalKey)</span>
+        );
+    }
+    
+    /**
+     * TC06: Invalid personal key (no uppercase letter)
+     * Expected: FAIL (Invalid)
+     */
+    public Map&lt;String, Object&gt; runTestCase06() {
+<span class="fc" id="L167">        String bankCode = &quot;123&quot;;</span>
+<span class="fc" id="L168">        String branchCode = &quot;4567&quot;;</span>
+<span class="fc" id="L169">        String accountNumber = &quot;1234567890&quot;;</span>
+<span class="fc" id="L170">        String personalKey = &quot;abcd1234&quot;;</span>
+        
+<span class="fc" id="L172">        boolean keyValid = ValidationUtil.isValidPersonalKey(personalKey);</span>
+<span class="pc bpc" id="L173" title="1 of 2 branches missed.">        boolean passed = !keyValid;</span>
+        
+<span class="fc" id="L175">        return createTestResult(</span>
+            &quot;TC06&quot;,
+            &quot;Invalid personal key (no uppercase letter)&quot;,
+            bankCode, branchCode, accountNumber, personalKey,
+            false,
+            passed,
+<span class="fc" id="L181">            ValidationUtil.getPersonalKeyError(personalKey)</span>
+        );
+    }
+    
+    /**
+     * TC07: Invalid personal key (no lowercase letter)
+     * Expected: FAIL (Invalid)
+     */
+    public Map&lt;String, Object&gt; runTestCase07() {
+<span class="fc" id="L190">        String bankCode = &quot;123&quot;;</span>
+<span class="fc" id="L191">        String branchCode = &quot;4567&quot;;</span>
+<span class="fc" id="L192">        String accountNumber = &quot;1234567890&quot;;</span>
+<span class="fc" id="L193">        String personalKey = &quot;ABCD1234&quot;;</span>
+        
+<span class="fc" id="L195">        boolean keyValid = ValidationUtil.isValidPersonalKey(personalKey);</span>
+<span class="pc bpc" id="L196" title="1 of 2 branches missed.">        boolean passed = !keyValid;</span>
+        
+<span class="fc" id="L198">        return createTestResult(</span>
+            &quot;TC07&quot;,
+            &quot;Invalid personal key (no lowercase letter)&quot;,
+            bankCode, branchCode, accountNumber, personalKey,
+            false,
+            passed,
+<span class="fc" id="L204">            ValidationUtil.getPersonalKeyError(personalKey)</span>
+        );
+    }
+    
+    /**
+     * TC08: Invalid personal key (no digit)
+     * Expected: FAIL (Invalid)
+     */
+    public Map&lt;String, Object&gt; runTestCase08() {
+<span class="fc" id="L213">        String bankCode = &quot;123&quot;;</span>
+<span class="fc" id="L214">        String branchCode = &quot;4567&quot;;</span>
+<span class="fc" id="L215">        String accountNumber = &quot;1234567890&quot;;</span>
+<span class="fc" id="L216">        String personalKey = &quot;AbcdEfgh&quot;;</span>
+        
+<span class="fc" id="L218">        boolean keyValid = ValidationUtil.isValidPersonalKey(personalKey);</span>
+<span class="pc bpc" id="L219" title="1 of 2 branches missed.">        boolean passed = !keyValid;</span>
+        
+<span class="fc" id="L221">        return createTestResult(</span>
+            &quot;TC08&quot;,
+            &quot;Invalid personal key (no digit)&quot;,
+            bankCode, branchCode, accountNumber, personalKey,
+            false,
+            passed,
+<span class="fc" id="L227">            ValidationUtil.getPersonalKeyError(personalKey)</span>
+        );
+    }
+    
+    /**
+     * TC09: Invalid bank code (contains letters)
+     * Expected: FAIL (Invalid)
+     */
+    public Map&lt;String, Object&gt; runTestCase09() {
+<span class="fc" id="L236">        String bankCode = &quot;12A&quot;;</span>
+<span class="fc" id="L237">        String branchCode = &quot;4567&quot;;</span>
+<span class="fc" id="L238">        String accountNumber = &quot;1234567890&quot;;</span>
+<span class="fc" id="L239">        String personalKey = &quot;Abcd1234&quot;;</span>
+        
+<span class="fc" id="L241">        boolean bankValid = ValidationUtil.isValidBankCode(bankCode);</span>
+<span class="pc bpc" id="L242" title="1 of 2 branches missed.">        boolean passed = !bankValid;</span>
+        
+<span class="fc" id="L244">        return createTestResult(</span>
+            &quot;TC09&quot;,
+            &quot;Invalid bank code (contains letters)&quot;,
+            bankCode, branchCode, accountNumber, personalKey,
+            false,
+            passed,
+<span class="fc" id="L250">            ValidationUtil.getBankCodeError(bankCode)</span>
+        );
+    }
+    
+    /**
+     * TC10: Invalid branch code (contains letters)
+     * Expected: FAIL (Invalid)
+     */
+    public Map&lt;String, Object&gt; runTestCase10() {
+<span class="fc" id="L259">        String bankCode = &quot;123&quot;;</span>
+<span class="fc" id="L260">        String branchCode = &quot;45AB&quot;;</span>
+<span class="fc" id="L261">        String accountNumber = &quot;1234567890&quot;;</span>
+<span class="fc" id="L262">        String personalKey = &quot;Abcd1234&quot;;</span>
+        
+<span class="fc" id="L264">        boolean branchValid = ValidationUtil.isValidBranchCode(branchCode);</span>
+<span class="pc bpc" id="L265" title="1 of 2 branches missed.">        boolean passed = !branchValid;</span>
+        
+<span class="fc" id="L267">        return createTestResult(</span>
+            &quot;TC10&quot;,
+            &quot;Invalid branch code (contains letters)&quot;,
+            bankCode, branchCode, accountNumber, personalKey,
+            false,
+            passed,
+<span class="fc" id="L273">            ValidationUtil.getBranchCodeError(branchCode)</span>
+        );
+    }
+    
+    /**
+     * TC11: Invalid account number (contains letters)
+     * Expected: FAIL (Invalid)
+     */
+    public Map&lt;String, Object&gt; runTestCase11() {
+<span class="fc" id="L282">        String bankCode = &quot;123&quot;;</span>
+<span class="fc" id="L283">        String branchCode = &quot;4567&quot;;</span>
+<span class="fc" id="L284">        String accountNumber = &quot;12345ABC90&quot;;</span>
+<span class="fc" id="L285">        String personalKey = &quot;Abcd1234&quot;;</span>
+        
+<span class="fc" id="L287">        boolean accountValid = ValidationUtil.isValidAccountNumber(accountNumber);</span>
+<span class="pc bpc" id="L288" title="1 of 2 branches missed.">        boolean passed = !accountValid;</span>
+        
+<span class="fc" id="L290">        return createTestResult(</span>
+            &quot;TC11&quot;,
+            &quot;Invalid account number (contains letters)&quot;,
+            bankCode, branchCode, accountNumber, personalKey,
+            false,
+            passed,
+<span class="fc" id="L296">            ValidationUtil.getAccountNumberError(accountNumber)</span>
+        );
+    }
+    
+    /**
+     * TC12: Invalid personal key (contains special characters)
+     * Expected: FAIL (Invalid)
+     */
+    public Map&lt;String, Object&gt; runTestCase12() {
+<span class="fc" id="L305">        String bankCode = &quot;123&quot;;</span>
+<span class="fc" id="L306">        String branchCode = &quot;4567&quot;;</span>
+<span class="fc" id="L307">        String accountNumber = &quot;1234567890&quot;;</span>
+<span class="fc" id="L308">        String personalKey = &quot;Abcd@1234&quot;;</span>
+        
+<span class="fc" id="L310">        boolean keyValid = ValidationUtil.isValidPersonalKey(personalKey);</span>
+<span class="pc bpc" id="L311" title="1 of 2 branches missed.">        boolean passed = !keyValid;</span>
+        
+<span class="fc" id="L313">        return createTestResult(</span>
+            &quot;TC12&quot;,
+            &quot;Invalid personal key (contains special characters)&quot;,
+            bankCode, branchCode, accountNumber, personalKey,
+            false,
+            passed,
+<span class="fc" id="L319">            ValidationUtil.getPersonalKeyError(personalKey)</span>
+        );
+    }
+    
+    /**
+     * Creates a test result map
+     */
+    private Map&lt;String, Object&gt; createTestResult(String testCase, String description,
+                                                 String bankCode, String branchCode,
+                                                 String accountNumber, String personalKey,
+                                                 boolean expectedValid, boolean passed, String message) {
+<span class="fc" id="L330">        Map&lt;String, Object&gt; result = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L331">        result.put(&quot;testCase&quot;, testCase);</span>
+<span class="fc" id="L332">        result.put(&quot;description&quot;, description);</span>
+<span class="fc" id="L333">        result.put(&quot;bankCode&quot;, bankCode);</span>
+<span class="fc" id="L334">        result.put(&quot;branchCode&quot;, branchCode);</span>
+<span class="fc" id="L335">        result.put(&quot;accountNumber&quot;, accountNumber);</span>
+<span class="fc" id="L336">        result.put(&quot;personalKey&quot;, personalKey);</span>
+<span class="fc" id="L337">        result.put(&quot;expectedValid&quot;, expectedValid);</span>
+<span class="fc" id="L338">        result.put(&quot;passed&quot;, passed);</span>
+<span class="pc bpc" id="L339" title="1 of 2 branches missed.">        result.put(&quot;status&quot;, passed ? &quot;PASS&quot; : &quot;FAIL&quot;);</span>
+<span class="fc" id="L340">        result.put(&quot;message&quot;, message);</span>
+        
+<span class="fc" id="L342">        return result;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

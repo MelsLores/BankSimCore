@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BankSimServerSimple.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.banksim</a> &gt; <span class="el_source">BankSimServerSimple.java</span></div><h1>BankSimServerSimple.java</h1><pre class="source lang-java linenums">package com.banksim;
+
+import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpExchange;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+/**
+ * Simple HTTP server for BankSim Enterprise.
+ * Serves static files and provides basic API endpoints.
+ * 
+ * @author Jorge Pena - REM Consultancy
+ * @version 5.0 Simple Edition
+ * @since 2024
+ */
+<span class="nc" id="L22">public class BankSimServerSimple {</span>
+    
+    private static final int PORT = 8080;
+    
+    public static void main(String[] args) {
+        try {
+<span class="nc" id="L28">            System.out.println(&quot;â•”â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•—&quot;);</span>
+<span class="nc" id="L29">            System.out.println(&quot;â•‘   BankSim Enterprise v5.0 (Simple)       â•‘&quot;);</span>
+<span class="nc" id="L30">            System.out.println(&quot;â•‘   Banking System - Static Server         â•‘&quot;);</span>
+<span class="nc" id="L31">            System.out.println(&quot;â•‘   Author: Jorge Pena - REM Consultancy   â•‘&quot;);</span>
+<span class="nc" id="L32">            System.out.println(&quot;â•šâ•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�&quot;);</span>
+<span class="nc" id="L33">            System.out.println();</span>
+            
+            // Create HTTP server
+<span class="nc" id="L36">            System.out.println(&quot;[1/2] Creating HTTP server...&quot;);</span>
+<span class="nc" id="L37">            HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);</span>
+<span class="nc" id="L38">            System.out.println(&quot;âœ“ HTTP server created on port &quot; + PORT);</span>
+<span class="nc" id="L39">            System.out.println();</span>
+            
+            // Register static file handler
+<span class="nc" id="L42">            System.out.println(&quot;[2/2] Registering handlers...&quot;);</span>
+<span class="nc" id="L43">            server.createContext(&quot;/&quot;, new StaticFileHandler());</span>
+<span class="nc" id="L44">            server.createContext(&quot;/api/status&quot;, new StatusHandler());</span>
+<span class="nc" id="L45">            System.out.println(&quot;  â†’ / (Static files)&quot;);</span>
+<span class="nc" id="L46">            System.out.println(&quot;  â†’ /api/status (Server status)&quot;);</span>
+<span class="nc" id="L47">            System.out.println(&quot;âœ“ All handlers registered&quot;);</span>
+<span class="nc" id="L48">            System.out.println();</span>
+            
+            // Start server
+<span class="nc" id="L51">            server.setExecutor(null); // creates a default executor</span>
+<span class="nc" id="L52">            server.start();</span>
+            
+<span class="nc" id="L54">            System.out.println(&quot;â•”â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•—&quot;);</span>
+<span class="nc" id="L55">            System.out.println(&quot;â•‘  Server is running on http://localhost:&quot; + PORT + &quot;  â•‘&quot;);</span>
+<span class="nc" id="L56">            System.out.println(&quot;â•‘  Press Ctrl+C to stop                    â•‘&quot;);</span>
+<span class="nc" id="L57">            System.out.println(&quot;â•šâ•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�&quot;);</span>
+<span class="nc" id="L58">            System.out.println();</span>
+<span class="nc" id="L59">            System.out.println(&quot;Available pages:&quot;);</span>
+<span class="nc" id="L60">            System.out.println(&quot;  Login:    http://localhost:8080/login.html&quot;);</span>
+<span class="nc" id="L61">            System.out.println(&quot;  Register: http://localhost:8080/register.html&quot;);</span>
+<span class="nc" id="L62">            System.out.println(&quot;  Status:   http://localhost:8080/api/status&quot;);</span>
+<span class="nc" id="L63">            System.out.println();</span>
+<span class="nc" id="L64">            System.out.println(&quot;Note: Full API requires database setup.&quot;);</span>
+<span class="nc" id="L65">            System.out.println(&quot;      Run: .\\scripts\\setup_database.ps1&quot;);</span>
+<span class="nc" id="L66">            System.out.println();</span>
+            
+            // Shutdown hook
+<span class="nc" id="L69">            Runtime.getRuntime().addShutdownHook(new Thread(() -&gt; {</span>
+<span class="nc" id="L70">                System.out.println();</span>
+<span class="nc" id="L71">                System.out.println(&quot;Shutting down server...&quot;);</span>
+<span class="nc" id="L72">                server.stop(0);</span>
+<span class="nc" id="L73">                System.out.println(&quot;âœ“ Server stopped&quot;);</span>
+<span class="nc" id="L74">            }));</span>
+            
+<span class="nc" id="L76">        } catch (IOException e) {</span>
+<span class="nc" id="L77">            System.err.println(&quot;Failed to start server: &quot; + e.getMessage());</span>
+<span class="nc" id="L78">            e.printStackTrace();</span>
+<span class="nc" id="L79">            System.exit(1);</span>
+<span class="nc" id="L80">        }</span>
+<span class="nc" id="L81">    }</span>
+    
+    /**
+     * Handler for static files (HTML, CSS, JS)
+     */
+<span class="nc" id="L86">    static class StaticFileHandler implements HttpHandler {</span>
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+<span class="nc" id="L89">            String path = exchange.getRequestURI().getPath();</span>
+            
+            // Default to index.html
+<span class="nc bnc" id="L92" title="All 2 branches missed.">            if (path.equals(&quot;/&quot;)) {</span>
+<span class="nc" id="L93">                path = &quot;/index.html&quot;;</span>
+            }
+            
+            // Serve static files
+<span class="nc" id="L97">            String filePath = &quot;src/main/resources/static&quot; + path;</span>
+            
+            try {
+<span class="nc" id="L100">                byte[] response = Files.readAllBytes(Paths.get(filePath));</span>
+                
+                // Set content type
+<span class="nc" id="L103">                String contentType = &quot;text/html&quot;;</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">                if (path.endsWith(&quot;.css&quot;)) contentType = &quot;text/css&quot;;</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">                if (path.endsWith(&quot;.js&quot;)) contentType = &quot;application/javascript&quot;;</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">                if (path.endsWith(&quot;.json&quot;)) contentType = &quot;application/json&quot;;</span>
+                
+<span class="nc" id="L108">                exchange.getResponseHeaders().set(&quot;Content-Type&quot;, contentType);</span>
+<span class="nc" id="L109">                exchange.sendResponseHeaders(200, response.length);</span>
+                
+<span class="nc" id="L111">                OutputStream os = exchange.getResponseBody();</span>
+<span class="nc" id="L112">                os.write(response);</span>
+<span class="nc" id="L113">                os.close();</span>
+                
+<span class="nc" id="L115">            } catch (IOException e) {</span>
+                // File not found
+<span class="nc" id="L117">                String notFound = &quot;&lt;h1&gt;404 Not Found&lt;/h1&gt;&lt;p&gt;File not found: &quot; + path + &quot;&lt;/p&gt;&quot;;</span>
+<span class="nc" id="L118">                byte[] response = notFound.getBytes(StandardCharsets.UTF_8);</span>
+                
+<span class="nc" id="L120">                exchange.getResponseHeaders().set(&quot;Content-Type&quot;, &quot;text/html&quot;);</span>
+<span class="nc" id="L121">                exchange.sendResponseHeaders(404, response.length);</span>
+                
+<span class="nc" id="L123">                OutputStream os = exchange.getResponseBody();</span>
+<span class="nc" id="L124">                os.write(response);</span>
+<span class="nc" id="L125">                os.close();</span>
+<span class="nc" id="L126">            }</span>
+<span class="nc" id="L127">        }</span>
+    }
+    
+    /**
+     * Handler for server status API
+     */
+<span class="nc" id="L133">    static class StatusHandler implements HttpHandler {</span>
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+<span class="nc" id="L136">            String response = &quot;{\&quot;status\&quot;:\&quot;running\&quot;,\&quot;version\&quot;:\&quot;5.0\&quot;,\&quot;message\&quot;:\&quot;BankSim Enterprise Server is running. Database setup required for full API.\&quot;}&quot;;</span>
+            
+<span class="nc" id="L138">            exchange.getResponseHeaders().set(&quot;Content-Type&quot;, &quot;application/json&quot;);</span>
+<span class="nc" id="L139">            exchange.getResponseHeaders().add(&quot;Access-Control-Allow-Origin&quot;, &quot;*&quot;);</span>
+<span class="nc" id="L140">            exchange.sendResponseHeaders(200, response.getBytes(StandardCharsets.UTF_8).length);</span>
+            
+<span class="nc" id="L142">            OutputStream os = exchange.getResponseBody();</span>
+<span class="nc" id="L143">            os.write(response.getBytes(StandardCharsets.UTF_8));</span>
+<span class="nc" id="L144">            os.close();</span>
+<span class="nc" id="L145">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BankSimServer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.banksim</a> &gt; <span class="el_source">BankSimServer.java</span></div><h1>BankSimServer.java</h1><pre class="source lang-java linenums">package com.banksim;
+
+import com.banksim.config.DatabaseConfig;
+import com.banksim.controller.*;
+import com.sun.net.httpserver.HttpServer;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.concurrent.Executors;
+
+/**
+ * Main server application for BankSim.
+ * Enterprise banking system with REST API.
+ * 
+ * @author Jorge Pena - REM Consultancy
+ * @version 5.0 Enterprise Edition
+ * @since 2024
+ */
+<span class="nc" id="L19">public class BankSimServer {</span>
+    
+    private static final int PORT = 8080;
+    private static final int THREAD_POOL_SIZE = 10;
+    
+    public static void main(String[] args) {
+        try {
+<span class="nc" id="L26">            System.out.println(&quot;â•”â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•—&quot;);</span>
+<span class="nc" id="L27">            System.out.println(&quot;â•‘   BankSim Enterprise v5.0                â•‘&quot;);</span>
+<span class="nc" id="L28">            System.out.println(&quot;â•‘   Banking System with PostgreSQL         â•‘&quot;);</span>
+<span class="nc" id="L29">            System.out.println(&quot;â•‘   Author: Jorge Pena - REM Consultancy   â•‘&quot;);</span>
+<span class="nc" id="L30">            System.out.println(&quot;â•šâ•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�&quot;);</span>
+<span class="nc" id="L31">            System.out.println();</span>
+            
+            // Initialize database connection pool
+<span class="nc" id="L34">            System.out.println(&quot;[1/4] Initializing database connection pool...&quot;);</span>
+<span class="nc" id="L35">            DatabaseConfig dbConfig = DatabaseConfig.getInstance();</span>
+<span class="nc" id="L36">            System.out.println(&quot;âœ“ Database pool initialized (max: 10, min idle: 2)&quot;);</span>
+<span class="nc" id="L37">            System.out.println();</span>
+            
+            // Create HTTP server
+<span class="nc" id="L40">            System.out.println(&quot;[2/4] Creating HTTP server...&quot;);</span>
+<span class="nc" id="L41">            HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);</span>
+<span class="nc" id="L42">            server.setExecutor(Executors.newFixedThreadPool(THREAD_POOL_SIZE));</span>
+<span class="nc" id="L43">            System.out.println(&quot;âœ“ HTTP server created on port &quot; + PORT);</span>
+<span class="nc" id="L44">            System.out.println();</span>
+            
+            // Register controllers
+<span class="nc" id="L47">            System.out.println(&quot;[3/4] Registering REST API controllers...&quot;);</span>
+            
+            // Authentication endpoints
+<span class="nc" id="L50">            server.createContext(&quot;/api/auth/&quot;, new AuthController());</span>
+<span class="nc" id="L51">            System.out.println(&quot;  â†’ /api/auth/login (POST)&quot;);</span>
+<span class="nc" id="L52">            System.out.println(&quot;  â†’ /api/auth/register (POST)&quot;);</span>
+<span class="nc" id="L53">            System.out.println(&quot;  â†’ /api/auth/refresh (POST)&quot;);</span>
+<span class="nc" id="L54">            System.out.println(&quot;  â†’ /api/auth/change-password (POST)&quot;);</span>
+            
+            // Customer endpoints
+<span class="nc" id="L57">            server.createContext(&quot;/api/customers&quot;, new CustomerController());</span>
+<span class="nc" id="L58">            System.out.println(&quot;  â†’ /api/customers (GET, POST)&quot;);</span>
+<span class="nc" id="L59">            System.out.println(&quot;  â†’ /api/customers/{id} (GET, PUT)&quot;);</span>
+<span class="nc" id="L60">            System.out.println(&quot;  â†’ /api/customers/{id}/verify-key (POST)&quot;);</span>
+<span class="nc" id="L61">            System.out.println(&quot;  â†’ /api/customers/user/{userId} (GET)&quot;);</span>
+            
+            // Account endpoints
+<span class="nc" id="L64">            server.createContext(&quot;/api/accounts&quot;, new AccountController());</span>
+<span class="nc" id="L65">            System.out.println(&quot;  â†’ /api/accounts (POST)&quot;);</span>
+<span class="nc" id="L66">            System.out.println(&quot;  â†’ /api/accounts/{id} (GET)&quot;);</span>
+<span class="nc" id="L67">            System.out.println(&quot;  â†’ /api/accounts/{id}/balance (GET)&quot;);</span>
+<span class="nc" id="L68">            System.out.println(&quot;  â†’ /api/accounts/customer/{customerId} (GET)&quot;);</span>
+            
+            // Transaction endpoints
+<span class="nc" id="L71">            server.createContext(&quot;/api/transactions&quot;, new TransactionController());</span>
+<span class="nc" id="L72">            System.out.println(&quot;  â†’ /api/transactions/deposit (POST)&quot;);</span>
+<span class="nc" id="L73">            System.out.println(&quot;  â†’ /api/transactions/withdraw (POST)&quot;);</span>
+<span class="nc" id="L74">            System.out.println(&quot;  â†’ /api/transactions/transfer (POST)&quot;);</span>
+<span class="nc" id="L75">            System.out.println(&quot;  â†’ /api/transactions/statement/{accountId} (GET)&quot;);</span>
+<span class="nc" id="L76">            System.out.println(&quot;  â†’ /api/transactions/account/{accountId} (GET)&quot;);</span>
+            
+            // Test endpoints
+<span class="nc" id="L79">            server.createContext(&quot;/api/tests&quot;, new TestController());</span>
+<span class="nc" id="L80">            System.out.println(&quot;  â†’ /api/tests/run-all (GET)&quot;);</span>
+            
+<span class="nc" id="L82">            System.out.println(&quot;âœ“ All controllers registered&quot;);</span>
+<span class="nc" id="L83">            System.out.println();</span>
+            
+            // Start server
+<span class="nc" id="L86">            System.out.println(&quot;[4/4] Starting server...&quot;);</span>
+<span class="nc" id="L87">            server.start();</span>
+<span class="nc" id="L88">            System.out.println(&quot;âœ“ Server started successfully!&quot;);</span>
+<span class="nc" id="L89">            System.out.println();</span>
+            
+<span class="nc" id="L91">            System.out.println(&quot;â•”â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•—&quot;);</span>
+<span class="nc" id="L92">            System.out.println(&quot;â•‘  Server is running on http://localhost:&quot; + PORT + &quot;  â•‘&quot;);</span>
+<span class="nc" id="L93">            System.out.println(&quot;â•‘  Press Ctrl+C to stop                    â•‘&quot;);</span>
+<span class="nc" id="L94">            System.out.println(&quot;â•šâ•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�&quot;);</span>
+<span class="nc" id="L95">            System.out.println();</span>
+<span class="nc" id="L96">            System.out.println(&quot;API Documentation:&quot;);</span>
+<span class="nc" id="L97">            System.out.println(&quot;  Authentication: http://localhost:8080/api/auth/&quot;);</span>
+<span class="nc" id="L98">            System.out.println(&quot;  Customers:      http://localhost:8080/api/customers&quot;);</span>
+<span class="nc" id="L99">            System.out.println(&quot;  Accounts:       http://localhost:8080/api/accounts&quot;);</span>
+<span class="nc" id="L100">            System.out.println(&quot;  Transactions:   http://localhost:8080/api/transactions&quot;);</span>
+<span class="nc" id="L101">            System.out.println(&quot;  Tests:          http://localhost:8080/api/tests/run-all&quot;);</span>
+<span class="nc" id="L102">            System.out.println();</span>
+            
+            // Shutdown hook
+<span class="nc" id="L105">            Runtime.getRuntime().addShutdownHook(new Thread(() -&gt; {</span>
+<span class="nc" id="L106">                System.out.println();</span>
+<span class="nc" id="L107">                System.out.println(&quot;Shutting down server...&quot;);</span>
+<span class="nc" id="L108">                server.stop(0);</span>
+                try {
+<span class="nc" id="L110">                    dbConfig.close();</span>
+<span class="nc" id="L111">                    System.out.println(&quot;âœ“ Database connections closed&quot;);</span>
+<span class="nc" id="L112">                } catch (Exception e) {</span>
+<span class="nc" id="L113">                    System.err.println(&quot;Error closing database: &quot; + e.getMessage());</span>
+<span class="nc" id="L114">                }</span>
+<span class="nc" id="L115">                System.out.println(&quot;âœ“ Server stopped&quot;);</span>
+<span class="nc" id="L116">            }));</span>
+            
+<span class="nc" id="L118">        } catch (IOException e) {</span>
+<span class="nc" id="L119">            System.err.println(&quot;Failed to start server: &quot; + e.getMessage());</span>
+<span class="nc" id="L120">            e.printStackTrace();</span>
+<span class="nc" id="L121">            System.exit(1);</span>
+<span class="nc" id="L122">        }</span>
+<span class="nc" id="L123">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
