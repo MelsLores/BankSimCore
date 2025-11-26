@@ -2,9 +2,9 @@
 
 ## 🎥 Demo Video - Test Execution & Simulator
 
-<video src="2025-11-26 04-20-30.mp4" controls width="100%"></video>
+![BankSim Demo - Test Execution & Interactive Simulator](demo-video.gif)
 
-> Video showing comprehensive test execution (72 tests) and interactive banking simulator in action
+> **Live demonstration**: 72 automated tests execution with 100% pass rate and interactive banking simulator showcasing deposits, withdrawals, and transfers
 
 ---
 
